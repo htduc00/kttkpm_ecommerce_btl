@@ -84,9 +84,9 @@ DATABASES = {
             'sql_mode': 'traditional',
         },
         'NAME': 'kttkpm_ecommerce_django_db',
-        'USER':'root',
-        'PASSWORD':'',
-        'HOST':'localhost',
+        'USER':'alpha',
+        'PASSWORD':'1234567',
+        'HOST':'26.245.54.185',
         'PORT':3306
     }
 }
