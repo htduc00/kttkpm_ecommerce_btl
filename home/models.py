@@ -6,7 +6,9 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
-
+from django.db.models import Avg, Count
+from django.contrib.auth.models import User
+import json
 
 class Aoquan(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True)  # Field name made lowercase.
@@ -283,7 +285,7 @@ class Notification(models.Model):
 
 class Order(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True)  # Field name made lowercase.
-    taikhoanid = models.ForeignKey('Taikhoan', models.DO_NOTHING, db_column='TaiKhoanID')  # Field name made lowercase.
+    taikhoanid = models.ForeignKey(User, models.DO_NOTHING, db_column='TaiKhoanID')  # Field name made lowercase.
     tongtien = models.FloatField(db_column='TongTien')  # Field name made lowercase.
     status = models.CharField(db_column='Status', max_length=255, blank=True, null=True)  # Field name made lowercase.
     createdat = models.DateField(db_column='CreatedAt', blank=True, null=True)  # Field name made lowercase.
@@ -342,7 +344,7 @@ class Phuong(models.Model):
 class Product(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True)  # Field name made lowercase.
     ten = models.CharField(db_column='Ten', max_length=255, blank=True, null=True)  # Field name made lowercase.
-    mota = models.CharField(db_column='MoTa', max_length=255, blank=True, null=True)  # Field name made lowercase.
+    mota = models.TextField(db_column='MoTa', max_length=255, blank=True, null=True)  # Field name made lowercase.
     danhgia = models.IntegerField(db_column='DanhGia')  # Field name made lowercase.
     gia = models.FloatField(db_column='Gia')  # Field name made lowercase.
     chitietsp = models.CharField(db_column='ChiTietSP', max_length=255, blank=True, null=True)  # Field name made lowercase.
@@ -352,7 +354,25 @@ class Product(models.Model):
     class Meta:
         managed = False
         db_table = 'product'
-
+    @property
+    def imageURL(self):
+        try:
+            url = self.hinhanh.url
+        except:
+            url = ''
+        return url
+    def avaregereview(self):
+        review = Review.objects.filter(productid=self.id).aggregate(avarage=Avg('rating'))
+        avg = 0
+        if review["avarage"] is not None:
+            avg=float(review["avarage"])
+        return avg
+    def countreview(self):
+        review = Review.objects.filter(productid=self.id).aggregate(count=Count('id'))
+        count = 0
+        if review["count"] is not None:
+            count = int(review["count"])
+        return count
 
 class ProductDiscount(models.Model):
     productid = models.ForeignKey(Product, models.DO_NOTHING, db_column='ProductID')  # Field name made lowercase.
@@ -365,7 +385,7 @@ class ProductDiscount(models.Model):
 
 class Productcomment(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True)  # Field name made lowercase.
-    taikhoanid = models.ForeignKey('Taikhoan', models.DO_NOTHING, db_column='TaiKhoanID')  # Field name made lowercase.
+    taikhoanid = models.ForeignKey(User, models.DO_NOTHING, db_column='TaiKhoanID')  # Field name made lowercase.
     noidung = models.CharField(db_column='NoiDung', max_length=255, blank=True, null=True)  # Field name made lowercase.
     createdat = models.DateField(db_column='CreatedAt', blank=True, null=True)  # Field name made lowercase.
     productid = models.ForeignKey(Product, models.DO_NOTHING, db_column='ProductID')  # Field name made lowercase.
@@ -377,7 +397,7 @@ class Productcomment(models.Model):
 
 class Productcommentreply(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True)  # Field name made lowercase.
-    taikhoanid = models.ForeignKey('Taikhoan', models.DO_NOTHING, db_column='TaiKhoanID')  # Field name made lowercase.
+    taikhoanid = models.ForeignKey(User, models.DO_NOTHING, db_column='TaiKhoanID')  # Field name made lowercase.
     productcommentid = models.ForeignKey(Productcomment, models.DO_NOTHING, db_column='ProductCommentID')  # Field name made lowercase.
     noidung = models.CharField(db_column='NoiDung', max_length=255, blank=True, null=True)  # Field name made lowercase.
     createdat = models.DateField(db_column='CreatedAt', blank=True, null=True)  # Field name made lowercase.
@@ -386,10 +406,9 @@ class Productcommentreply(models.Model):
         managed = False
         db_table = 'productcommentreply'
 
-
 class Productcommentreplyreaction(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True)  # Field name made lowercase.
-    taikhoanid = models.ForeignKey('Taikhoan', models.DO_NOTHING, db_column='TaiKhoanID')  # Field name made lowercase.
+    taikhoanid = models.ForeignKey(User, models.DO_NOTHING, db_column='TaiKhoanID')  # Field name made lowercase.
     productcommentreplyid = models.ForeignKey(Productcommentreply, models.DO_NOTHING, db_column='ProductCommentReplyID')  # Field name made lowercase.
     reaction = models.CharField(db_column='Reaction', max_length=255, blank=True, null=True)  # Field name made lowercase.
 
@@ -420,9 +439,10 @@ class Quan(models.Model):
 
 class Review(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True)  # Field name made lowercase.
-    taikhoanid = models.ForeignKey('Taikhoan', models.DO_NOTHING, db_column='TaiKhoanID')  # Field name made lowercase.
+    taikhoanid = models.ForeignKey(User, models.DO_NOTHING, db_column='TaiKhoanID')  # Field name made lowercase.
     productid = models.ForeignKey(Product, models.DO_NOTHING, db_column='ProductID')  # Field name made lowercase.
-    noidung = models.CharField(db_column='NoiDung', max_length=255, blank=True, null=True)  # Field name made lowercase.
+    subject = models.TextField(db_column="Subject", max_length=255, blank=True, null  =True)
+    noidung = models.TextField(db_column='NoiDung', max_length=255, blank=True, null=True)  # Field name made lowercase.
     rating = models.IntegerField(db_column='Rating')  # Field name made lowercase.
     createdat = models.DateField(db_column='CreatedAt', blank=True, null=True)  # Field name made lowercase.
 
