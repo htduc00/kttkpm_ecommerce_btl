@@ -87,8 +87,12 @@
                                 <form action="/order/addtoshopcart/{{ product.id }}" method="post"  id="post-form">
                                     {% csrf_token %}
                                     <div id="SelectedProduct">
-                                        <p><strong>Còn lại:</strong> 100 sản phẩm </p>
-                                        <h3 class="product-price">{{product.gia}} VND</h3>
+                                        <p>
+                                            <strong>Còn lại:</strong> 
+                                            <span id ="remain" style="color: red"></span> 
+                                        </p>
+                                        <h3 class="product-price" id="price" >{{product.gia}} VND</h3>
+                                        {% if color_size %}
                                         <p style="color:gray; font-size: 12pt;font-family: Arial">
                                             Chọn màu: 
                                             <span id = "color" style="color: rgb(36, 36, 36);font-weight: 500;"></span>
@@ -105,8 +109,10 @@
                                             <span class = "size-span" data-size="{{size}}" onClick="selectSize(this.dataset.size)">{{size}}</span>
                                         {% endfor %}
                                         </div>
-
+                                        {% endif %}
+                                        {% if discounts|length > 0 %}
                                         <p style="color: rgb(36, 36, 36);font-weight: 500;font-size: 14pt;font-family: Arial">{{discounts|length}} Mã Giảm Giá</p>
+                                        {% endif %}
                                         {% for discount in discounts %}
                                             <span class="coupon"
                                                  data-hsd="{{discount.discountid.hsd}}" data-requiree="{{discount.discountid.requiree}}" data-discountvalue="{{discount.discountid.value}}" onClick="DiscountDetail(this.dataset.hsd, this.dataset.requiree, this.dataset.discountvalue)">Giảm {{discount.discountid.value}}K
@@ -116,7 +122,7 @@
                                         <div class="qty-input" style="margin-top: 20px">
                                             <span class="text-uppercase">Amount: </span>
                                             <input class="input" name="quantity" type="number" value="1" min="1" max="{{ product.amount }}">
-                                            <button type="submit" class="primary-btn add-to-cart">
+                                            <button type="submit" class="primary-btn add-to-cart" id="addToCart">
                                                 <i class="fa fa-shopping-cart"></i> Add to Cart
                                             </button>
                                         </div>
@@ -429,12 +435,46 @@
             
         }
 
+
+
         function selectSize(size){
             $('#size').text(size);
+            if( $('#color').text() != ""){
+                var selectedColorSize = $('#color').text().toLowerCase()+'-'+$('#size').text();
+                var color_size = {{ color_size| safe}};
+                for(var i=0; i<color_size.length;i++){
+                    item = color_size[i];
+                    if(item.tenvalue == selectedColorSize){
+                        $('#remain').text(item.soluongsanphamconlai +" sản phẩm");
+                        $('#price').text(item.gia.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")+" VND");
+                        $('#addToCart').attr('disabled', false);
+                        return;
+                    }
+                }
+                $('#price').text("0 VND");
+                $('#remain').text("Sản phẩm này đã hết hàng !!");
+            }
         }
+
         function selectColor(color){
-            console.log(color)
-            $('#color').text(color);
+            $('#color').text(color.toUpperCase());
+            if( $('#size').text() != ""){
+                var selectedColorSize = $('#color').text().toLowerCase()+'-'+$('#size').text();
+                var color_size = {{ color_size| safe}};
+                for(var i=0; i<color_size.length;i++){
+                    item = color_size[i];
+                    if(item.tenvalue == selectedColorSize){
+                        $('#remain').text(item.soluongsanphamconlai +" sản phẩm");
+                        $('#price').text(item.gia.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")+" VND");
+                        $('#addToCart').attr('disabled', false);
+                        return;
+                    }
+                }
+                $('#price').text("0 VND");
+                $('#remain').text("Sản phẩm này đã hết hàng !!");
+            }
         }
+
+        $('#addToCart').attr('disabled', true);
     </script>
 {% endblock %}

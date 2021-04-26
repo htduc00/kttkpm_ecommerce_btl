@@ -97,7 +97,7 @@ def product_detail(request,id,name):
                 colors.append(value[0])
             if value[1] not in sizes:
                 sizes.append(value[1])
-        context.update({'color_size':color_size, 'colors':colors, 'sizes':sizes })
+        context.update({'color_size':list(color_size.values()), 'colors':colors, 'sizes':sizes })
     if request.method == 'GET' and request.is_ajax() == False :
         return render(request,'product_detail.html',context)
     elif request.GET.get('type') == "rv":
