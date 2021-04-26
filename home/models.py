@@ -6,7 +6,12 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
+from ckeditor.fields import RichTextField
+from ckeditor_uploader.fields import RichTextUploadingField
+from django.db.models import Avg, Count
+from django.contrib.auth.models import User
 
+from django.utils.safestring import mark_safe
 
 class Aoquan(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True)  # Field name made lowercase.
@@ -102,6 +107,9 @@ class Chitiettheloaisach(models.Model):
     class Meta:
         managed = False
         db_table = 'chitiettheloaisach'
+    
+    def __str__(self):
+        return self.tenchitiettheloaisach
 
 
 class Color(models.Model):
@@ -173,7 +181,6 @@ class Hinhanhsanpham(models.Model):
     class Meta:
         managed = False
         db_table = 'hinhanhsanpham'
-
 
 class Khachhang(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True)  # Field name made lowercase.
@@ -268,6 +275,9 @@ class Nhaxuatban(models.Model):
         managed = False
         db_table = 'nhaxuatban'
 
+    def __str__(self):
+        return self.tennhaxuatban
+
 
 class Notification(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True)  # Field name made lowercase.
@@ -342,16 +352,32 @@ class Phuong(models.Model):
 class Product(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True)  # Field name made lowercase.
     ten = models.CharField(db_column='Ten', max_length=255, blank=True, null=True)  # Field name made lowercase.
-    mota = models.CharField(db_column='MoTa', max_length=255, blank=True, null=True)  # Field name made lowercase.
+    mota = RichTextField(db_column='MoTa', blank=True, null=True)  # Field name made lowercase.
     danhgia = models.IntegerField(db_column='DanhGia')  # Field name made lowercase.
     gia = models.FloatField(db_column='Gia')  # Field name made lowercase.
-    chitietsp = models.CharField(db_column='ChiTietSP', max_length=255, blank=True, null=True)  # Field name made lowercase.
+    chitietsp = RichTextUploadingField(db_column='ChiTietSP', blank=True, null=True)  # Field name made lowercase.
     hinhanh = models.ImageField(db_column='HinhAnh', blank=True, null=True)  # Field name made lowercase.
     type = models.CharField(db_column='Type', max_length=255, blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
         db_table = 'product'
+    
+    def __str__(self):
+        return self.ten
+
+    def avaregereview(self):
+        review = Review.objects.filter(productid=self.id).aggregate(avarage=Avg('rating'))
+        avg = 0
+        if review["avarage"] is not None:
+            avg=float(review["avarage"])
+        return round(avg,2)
+    def countreview(self):
+        review = Review.objects.filter(productid=self.id).aggregate(count=Count('id'))
+        count = 0
+        if review["count"] is not None:
+            count = int(review["count"])
+        return count
 
 
 class ProductDiscount(models.Model):
@@ -420,7 +446,7 @@ class Quan(models.Model):
 
 class Review(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True)  # Field name made lowercase.
-    taikhoanid = models.ForeignKey('Taikhoan', models.DO_NOTHING, db_column='TaiKhoanID')  # Field name made lowercase.
+    taikhoanid = models.ForeignKey(User, models.DO_NOTHING, db_column='TaiKhoanID')  # Field name made lowercase.
     productid = models.ForeignKey(Product, models.DO_NOTHING, db_column='ProductID')  # Field name made lowercase.
     noidung = models.CharField(db_column='NoiDung', max_length=255, blank=True, null=True)  # Field name made lowercase.
     rating = models.IntegerField(db_column='Rating')  # Field name made lowercase.
@@ -429,16 +455,22 @@ class Review(models.Model):
     class Meta:
         managed = False
         db_table = 'review'
+    
+    def __str__(self):
+        return self.noidung
 
 
 class Role(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True)  # Field name made lowercase.
     rolename = models.CharField(db_column='RoleName', max_length=255, blank=True, null=True)  # Field name made lowercase.
-    isdeleted = models.TextField(db_column='IsDeleted')  # Field name made lowercase. This field type is a guess.
+    isdeleted = models.BooleanField(db_column='IsDeleted')  # Field name made lowercase. This field type is a guess.
 
     class Meta:
         managed = False
         db_table = 'role'
+
+    def __str__(self):
+        return self.rolename
 
 
 class Sachtype(models.Model):
@@ -452,6 +484,8 @@ class Sachtype(models.Model):
     class Meta:
         managed = False
         db_table = 'sachtype'
+
+    
 
 
 class SachtypeChitiettheloaisach(models.Model):
@@ -511,6 +545,9 @@ class Tacgia(models.Model):
         managed = False
         db_table = 'tacgia'
 
+    def __str__(self):
+        return self.tentacgia
+
 
 class Taikhoan(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True)  # Field name made lowercase.
@@ -521,11 +558,44 @@ class Taikhoan(models.Model):
     isdeleted = models.TextField(db_column='IsDeleted')  # Field name made lowercase. This field type is a guess.
     nhanvienid = models.OneToOneField(Nhanvien, models.DO_NOTHING, db_column='NhanVienID')  # Field name made lowercase.
     khachhangid = models.OneToOneField(Khachhang, models.DO_NOTHING, db_column='KhachHangID')  # Field name made lowercase.
-    roleid = models.ForeignKey(Role, models.DO_NOTHING, db_column='RoleID')  # Field name made lowercase.
+    #roleid = models.ForeignKey('Role', models.DO_NOTHING, db_column='ID')  # Field name made lowercase.
 
     class Meta:
         managed = False
         db_table = 'taikhoan'
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    hovaten = models.CharField(db_column='HoVaTen', max_length=255, blank=True, null=True)  # Field name made lowercase.
+    	
+    ngaysinh = models.DateField(db_column='NgaySinh', blank=True, null=True)  # Field name made lowercase.
+    GENDER_CHOICES = (
+        ('','----'),
+        ('Nam', 'Nam'),
+        ('Nữ', 'Nữ'),
+    )
+
+    gioitinh = models.CharField(db_column='GioiTinh',max_length=10, choices=GENDER_CHOICES)  # Field name made lowercase.
+    diachi = models.CharField(db_column='DiaChi', max_length=255, blank=True, null=True)  # Field name made lowercase.
+    sodt = models.CharField(db_column='SoDT', max_length=255, blank=True, null=True)  # Field name made lowercase.
+    thethanhvien = models.ForeignKey('Thethanhvien', models.DO_NOTHING)  # Field name made lowercase.
+    role = models.ForeignKey('Role', models.DO_NOTHING)  # Field name made lowercase.
+    image = models.ImageField(db_column='image', blank=True, null=True)  # Field name made lowercase.
+
+    username = None
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
+    def __str__(self):
+        return self.user.username
+
+    def image_tag(self):
+        return mark_safe('<img src="{}" height="50"/>'.format(self.image.url))
+    image_tag.short_description = 'Image'
+    class Meta:
+        managed = False
+        db_table = 'home_userprofile'
 
 
 class Thanhpho(models.Model):
@@ -563,16 +633,21 @@ class Theloaisach(models.Model):
         managed = False
         db_table = 'theloaisach'
 
+    def __str__(self):
+        return self.tentheloai
+
 
 class Thethanhvien(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True)  # Field name made lowercase.
     sothe = models.CharField(db_column='SoThe', max_length=255, blank=True, null=True)  # Field name made lowercase.
     diemtichluy = models.IntegerField(db_column='DiemTichLuy', blank=True, null=True)  # Field name made lowercase.
-    loaithe = models.CharField(db_column='LoaiThe', max_length=255, blank=True, null=True)  # Field name made lowercase.
-
+    loaithe = models.CharField(db_column='LoaiThe', max_length=255, blank=True, null=True)  # Field name made lowercase.  
     class Meta:
         managed = False
         db_table = 'thethanhvien'
+    
+    def __str__(self):
+        return self.sothe
 
 
 class Thongtingiaohang(models.Model):

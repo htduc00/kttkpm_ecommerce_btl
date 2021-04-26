@@ -1,21 +1,100 @@
-{% load static %}
+{% load static %} 
 {% load i18n %}
 
 <!-- NAVIGATION -->
 <div id="navigation">
-    <!-- container -->
-    <div class="container">
+  <!-- container -->
+  <div class="container">
         <div id="responsive-nav">
-            <!-- category nav -->
-            {% if page %}
-                <div class="category-nav">
-            {% else %}
-                <div class="category-nav show-on-click">
-            {% endif %}
-            <span class="category-header">{% trans "Categories" %} <i class="fa fa-list"></i></span>
-            <ul class="category-list">
-                {{ category | safe  }}
-            </ul>
+      <!-- category nav -->
+            <div class="category-nav">
+                <span class="category-header">Categories<i class="fa fa-list"></i></span>                
+                <ul class="category-list">
+                    <li class="dropdown side-dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">Sách<i class="fa fa-angle-right"></i></a>
+                        <div class="custom-menu">
+                            <ul class="list-links">
+                            <li>
+                                <a href="#">Văn học</a>
+                            </li>
+                            <li>
+                                <a href="#">Tâm lí - Kỹ năng sống</a>
+                            </li>
+                            <li>
+                                <a href="#">Nuôi dạy con</a>
+                            </li>
+                            <li>
+                                <a href="#">Ngoại ngữ</a>
+                            </li>
+                            <li>
+                                <a href="#">Phụ nữ</a>
+                            </li>
+                            <li>
+                                <a href="#">Kinh doanh - Kinh tế</a>
+                            </li>
+                            <li>
+                                <a href="#">Luật</a>
+                            </li>
+                            <li>
+                                <a href="#">Nấu ăn - Nuôi trồng</a>
+                            </li>
+                            <li>
+                                <a href="#">Y Học</a>
+                            </li>
+                            <li>
+                                <a href="#">Thiếu nhi</a>
+                            </li>
+                            <li>
+                                <a href="#">Sách Khoa Học</a>
+                            </li>
+                            <li>
+                                <a href="#">Lịch Sử - Địa Lí - Tôn Giáo</a>
+                            </li>
+                            </ul>
+                        </div>
+                    </li>
+                    
+                    <li class="dropdown side-dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">Điện tử<i class="fa fa-angle-right"></i></a>
+                        <div class="custom-menu">
+                            <ul class="list-links">
+                            <li>
+                                <a href="#">Điện Thoại - Máy Tính Bảng</a>
+                            </li>
+                            <li>
+                                <a href="#">Điện Tử - Điện Lạnh</a>
+                            </li>
+                            <li>
+                                <a href="#">Phụ Kiện - Thiết Bị Số</a>
+                            </li>
+                            <li>
+                                <a href="#">Laptop - Thiết Bị IT</a>
+                            </li>
+                            <li>
+                                <a href="#">Máy Ảnh - Quay Phim</a>
+                            </li>
+                            <li>
+                                <a href="#">Điện Gia Dụng</a>
+                            </li>
+                            </ul>
+                        </div>
+                    </li>
+
+                    <li class="dropdown side-dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">Áo quần<i class="fa fa-angle-right"></i></a>
+                        <div class="custom-menu">
+                            <ul class="list-links">
+                            <li>
+                                <a href="#">Thời Trang Nam </a>
+                            </li>
+                            <li>
+                                <a href="#">Thời Trang Nữ </a>
+                            </li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+
             </div>
             <!-- /category nav -->
 
@@ -23,14 +102,18 @@
             <div class="menu-nav">
                 <span class="menu-header">Menu<i class="fa fa-bars"></i></span>
                 <ul class="menu-list">
-                    <li><a>{% trans "Home" %}</a></li>
-                    <li><a >{% trans "About Us" %}</a></li>
-                    <li><a>{% trans "Contact Us" %}</a></li>
+                    <li><a href="{% url 'home' %}">Home</a></li>
+                    <li><a>About Us</a></li>
+                    <li><a>Contact Us</a></li>
                 </ul>
             </div>
-            <!-- menu nav -->
-            </div>
-        </div>
-        <!-- /container -->
+
+
+        <!-- menu nav -->
+      </div>
+      <!-- /container -->
     </div>
     <!-- /NAVIGATION -->
+</div>
+
+

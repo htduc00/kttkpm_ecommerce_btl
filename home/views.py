@@ -12,6 +12,11 @@ from django.shortcuts import render
 # Create your views here.
 from django.urls import reverse
 from home.forms import SearchForm
+from .models import Product
 
 def index(request):
-    return render(request,'index.html')
+    products_picked = Product.objects.all().order_by('?')[:4]   #Random selected 4 products
+    products_latest = Product.objects.all().order_by('-id')[:4]  # last 4 products
+    products_slider = Product.objects.all().order_by('?')[:4]  #first 4 products
+    context = {'products_slider': products_slider, 'products_latest': products_latest,'products_picked': products_picked}
+    return render(request,'index.html', context)

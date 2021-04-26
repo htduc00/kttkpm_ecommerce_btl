@@ -9,6 +9,7 @@
     menuList = $('#responsive-nav .menu-nav .menu-list');
 
   catToggle.on('click', function() {
+    console.log(catList.get())
     menuList.removeClass('open');
     catList.toggle('open');
   });
