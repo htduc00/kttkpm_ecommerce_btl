@@ -1,6 +1,31 @@
 {% load static %}
 {% load i18n %}
-<header>    
+<header>
+    <!-- top Header -->
+    <div id="top-header">
+        <div class="container">
+            <div class="pull-left">
+                <span>Welcome to E-shop!</span>
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{message.tags}}" role="alert">
+                            {{ message |safe }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="pull-right">
+                <ul class="header-top-links">
+                    <li><a href="#">Store</a></li>
+                    <li><a href="#">Newsletter</a></li>
+                    <li><a href="#">FAQ</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- /top Header -->
+
     <!-- header -->
     <div id="header">
         <div class="container">
@@ -62,11 +87,11 @@
                         {% endif %}
 
                         <ul class="custom-menu">
-                            <li><a href="{% url 'user_index' %}"><i class="fa fa-user-o"></i> {% trans "My Account" %}</a></li>
-                            <li><a href="#"><i class="fa fa-heart-o"></i> {% trans "My Favorits" %}</a></li>
-                            <li><a ><i class="fa fa-exchange"></i> {% trans "My Orders " %}</a></li>
-                            <li><a ><i class="fa fa-check"></i> {% trans "My Comments" %}</a></li>
-                            <li><a href="{% url 'logout' %}"><i class="fa fa-unlock-alt"></i> {% trans "Logout" %}</a></li>
+                            <li><a href="{% url 'user_index' %}"><i class="fa fa-user-o"></i>My Account</a></li>
+                            <li><a href="#"><i class="fa fa-heart-o"></i>My Favorits</a></li>
+                            <li><a ><i class="fa fa-exchange"></i>My Orders</a></li>
+                            <li><a ><i class="fa fa-check"></i>My Comments</a></li>
+                            <li><a href="{% url 'logout' %}"><i class="fa fa-unlock-alt"></i>Logout</a></li>
                         </ul>
                     </li>
                     <!-- /Account -->

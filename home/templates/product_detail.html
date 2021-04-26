@@ -1,0 +1,324 @@
+{% extends 'homebase.html' %}
+{% load static %}
+{% block title %} {{ product.ten }} {% endblock %}
+
+{% block head %}
+  <script src="/static/js/jquery-2.2.4.min.js"></script>
+{% endblock %}
+
+{% block sidebar %} {% include 'sidebar.html' %} {% endblock %}
+
+{% block body %}
+    <!-- BREADCRUMB -->
+    <div id="breadcrumb">
+        <div class="container">
+            <ul class="breadcrumb">
+                <li><a href="/">Home</a></li>
+                <!--<li><a href="/category/{{ product.category.id }}/{{ product.category.slug }}">{{ product.category.title }}</a></li>
+                -->
+                <li><a href="/category/{{ product.type }}">{{ product.type }}</a></li>
+                <li class="active">{{ product.ten }}</li>
+            </ul>
+        </div>
+    </div>
+    <!-- /BREADCRUMB -->
+
+    <!-- section -->
+    <div class="section">
+        <!-- container -->
+        <div class="container">
+            <!-- row -->
+            <div class="row">
+                <!--  Product Details -->
+                <div class="product product-details clearfix">
+                    <div class="col-md-6">
+                        <div id="product-main-view">
+                            <div class="product-view">
+                                <img src="{{ product.imageURL }}" alt="" style="height: 400px">
+                            </div>
+                            {% for image in images %}
+                                <div class="product-view">
+                                    <img src="{{ image.urlimage.url }}" alt="" style="height: 400px">
+                                </div>
+                            {% endfor %}
+
+
+                        </div>
+                        <div id="product-view">
+                            <div class="product-view">
+                                <img src="{{ product.imageURL }}" alt="">
+                            </div>
+                            {% for image in images %}
+                                <div class="product-view">
+                                    <img src="{{ image.urlimage.url }}" alt="aa" >
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="product-body">
+                            <div class="product-label">
+                                <span>New</span>
+                                <span class="sale">-20%</span>
+                            </div>
+                            <h2 class="product-name">{{ product.ten }}</h2>
+                            <div>
+                                <div class="product-rating">
+                                    <i class="fa fa-star{% if product.avaregereview < 1%}-o empty{% endif%}"></i>
+                                    <i class="fa fa-star{% if product.avaregereview < 2%}-o empty{% endif%}"></i>
+                                    <i class="fa fa-star{% if product.avaregereview < 3%}-o empty{% endif%}"></i>
+                                    <i class="fa fa-star{% if product.avaregereview < 4%}-o empty{% endif%}"></i>
+                                    <i class="fa fa-star{% if product.avaregereview < 5%}-o empty{% endif%}"></i>
+                                    {{ product.avaregereview |stringformat:".2f"}}
+                                </div>
+
+
+
+                                <a href="#tab1"> {{ product.countreview}}  Review(s) / Add Review</a>
+                            </div>
+                            {% if product.type == "Book" %}
+                            <p><strong>Tác giả:</strong> <a href="#" style = "color: blue">Keigo</a> </p>
+                            {% else %}
+                            <p><strong>Thương hiệu:</strong> <a href="#" style = "color: blue">Samsung</a> </p>
+                            {% endif %}
+                            <p>{{ product.mota }}</p>
+                            
+                            <div class="product-btns">
+                                <form action="/order/addtoshopcart/{{ product.id }}" method="post"  id="post-form">
+                                    {% csrf_token %}
+                                    <div id="SelectedProduct">
+                                        <p><strong>Còn lại:</strong> 100 sản phẩm </p>
+                                        <h3 class="product-price">{{product.gia}} VND</h3>
+                                        <div class="qty-input">
+                                            <span class="text-uppercase">Amount: </span>
+                                            <input class="input" name="quantity" type="number" value="1" min="1" max="{{ product.amount }}">
+                                            <button type="submit" class="primary-btn add-to-cart">
+                                                <i class="fa fa-shopping-cart"></i> Add to Cart
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <br>
+                                <div class="pull-right">
+                                    <button class="main-btn icon-btn"><i class="fa fa-heart"></i></button>
+                                    <button class="main-btn icon-btn"><i class="fa fa-exchange"></i></button>
+                                    <button class="main-btn icon-btn"><i class="fa fa-share-alt"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="product-tab">
+                            <ul class="tab-nav">
+                                <li class="active"><a data-toggle="tab" href="#tab1">Details</a></li>
+                                <li><a data-toggle="tab" href="#tab2">Reviews</a></li>
+                                <li><a data-toggle="tab" href="#tab3">Comments</a></li>
+                            </ul>
+                            <!-- Detail -->
+                            <div class="tab-content">
+                                <div id="tab1" class="tab-pane fade in active">
+                                    <p>
+                                        {{ product.chitietsp }}
+                                    </p>
+                                </div>
+                                <!-- End Detail -->
+                                <!-- Review  -->
+                                <div id="tab2" class="tab-pane fade in">
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div id = "review" class="product-reviews">
+                                                {% for review in reviews %}
+                                                    <div class="single-review">
+                                                        <div class="review-heading">
+                                                            <div><a href="#"><i class="fa fa-user-o"></i> {{ review.taikhoanid.first_name }}
+                                                            {{review.taikhoanid.last_name}}</a> </div>
+                                                            <div><b>{{ review.subject }}</b> </div>
+                                                            <div><a href="#"><i class="fa fa-clock-o"></i> {{ review.createdat}}</a></div>
+
+                                                            <div class="review-rating pull-right">
+                                                                <i class="fa fa-star{% if review.rating < 1 %}-o empty{% endif %}"></i>
+                                                                <i class="fa fa-star{% if review.rating < 2 %}-o empty{% endif %}"></i>
+                                                                <i class="fa fa-star{% if review.rating < 3 %}-o empty{% endif %}"></i>
+                                                                <i class="fa fa-star{% if review.rating < 4 %}-o empty{% endif %}"></i>
+                                                                <i class="fa fa-star{% if review.rating < 5 %}-o empty{% endif %}"></i>
+
+                                                            </div>
+
+                                                        </div>
+                                                        <div class="review-body">
+                                                            <p>{{ review.noidung }}</p>
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                            <ul class="reviews-pages">
+                                                {% for num in reviews.paginator.page_range %}
+                                                <li><a id="{{num}}" onclick="changePage(this.id)">{{ num }}</a></li>
+                                                {% endfor %}
+                                            </ul>
+                                                <script type="text/javascript">
+                                                    function changePage(id){
+                                                        let page = id; 
+                                                        $.ajax({
+                                                            type: 'get',
+                                                            url: '/product/1/abc/',
+                                                            data: {page: page},
+                                                            success: function(data){
+                                                                console.log(data);
+                                                                let out='';
+                                                                $.each(data.review_li, function(index, review){
+                                                                    out += '<div class="single-review">';
+                                                                    out +='<div class="review-heading">';
+                                                                    out += '<div> <a href="#"><i class="fa fa-user-o"></i> '+review.taikhoanid__first_name+' '+review.taikhoanid__last_name+'</a> </div>';
+                                                                    out += '<div><b>'+ review.subject +'</b> </div>';
+                                                                    out += '<div><a href="#"><i class="fa fa-clock-o"></i> '+review.createdat+'</a></div>';
+                                                                    out += '</div>';
+                                                                    out += '<div class="review-body"><p>'+review.noidung+'</p></div>';
+                                                                    out += '</div>';
+                                                                })
+                                                                $('#review').html(out);
+                                                            }
+                                                        })
+                                                    }
+                                                </script>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h4 class="text-uppercase">Write Your Review</h4>
+                                            <!--
+                                            {% if messages %}
+                                                {% for message in messages %}
+                                                    <div class="alert alert-{{message.tags}}" role="alert">
+                                                        {{ message }}
+                                                    </div>
+                                                {% endfor %}
+                                            {% endif %}
+                                            -->
+                                            <form class="review-form" action="/addreview/{{ product.id }}" method="post">
+                                                {% csrf_token %}
+                                                <div class="form-group">
+                                                    <input name="subject" class="input" type="text" placeholder="Your subject" />
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <textarea name="noidung" class="input" placeholder="Your review"></textarea>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="input-rating">
+                                                        <strong class="text-uppercase">Your Rating: </strong>
+                                                        <div class="stars">
+                                                            <input type="radio" id="star5" name="rating" value="5" /><label for="star5"></label>
+                                                            <input type="radio" id="star4" name="rating" value="4" /><label for="star4"></label>
+                                                            <input type="radio" id="star3" name="rating" value="3" /><label for="star3"></label>
+                                                            <input type="radio" id="star2" name="rating" value="2" /><label for="star2"></label>
+                                                            <input type="radio" id="star1" name="rating" value="1" /><label for="star1"></label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {% if user.id is None %}
+                                                    You must be logged in to post a review
+                                                {% else %}
+                                                    <button class="primary-btn">Submit</button>
+                                                {% endif %}
+                                            </form>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- End Review -->
+
+                                <!-- Comment -->
+                                 <div id="tab3" class="tab-pane fade in">
+                                    <div class="comments-container">
+                                        <ul id="comments-list" class="comments-list">
+                                        {% for comment in comments %}
+                                          <li>
+                                            <div class="comment-main-level">
+                                              <!-- Avatar -->
+                                              <div class="comment-avatar"><img src="http://i9.photobucket.com/albums/a88/creaticode/avatar_1_zps8e1c80cd.jpg" alt=""></div>
+                                              <!-- Contenedor del Comentario -->
+                                              <div class="comment-box">
+                                                <div class="comment-head">
+                                                  <h6 class="comment-name"><a href="#">{{ comment.taikhoanid.first_name }} {{comment.taikhoanid.last_name}}</a></h6>
+                                                  <span>{{ comment.createdat }}</span>
+                                                  <i class="fa fa-reply"></i>
+                                                  <i class="fa fa-heart"></i>
+                                                </div>
+                                                <div class="comment-content">
+                                                  {{ comment.noidung }}
+                                                </div>
+                                              </div>
+                                            </div>
+                                            <!-- Respuestas de los comentarios -->
+                                            <ul class="comments-list reply-list">
+                                            {% for reply in commentReplys %}
+                                                {% if reply.productcommentid == comment %}
+                                              <li>
+                                                <!-- Avatar -->
+                                                <div class="comment-avatar"><img src="http://i9.photobucket.com/albums/a88/creaticode/avatar_2_zps7de12f8b.jpg" alt=""></div>
+                                                <!-- Contenedor del Comentario -->
+                                                <div class="comment-box">
+                                                  <div class="comment-head">
+                                                    <h6 class="comment-name"><a href="#">{{reply.taikhoanid.first_name}} {{reply.taikhoanid.last_name}}</a></h6>
+                                                    <span>{{reply.createdat}}</span>
+                                                    <i class="fa fa-reply"></i>
+                                                    <i class="fa fa-heart"></i>
+                                                  </div>
+                                                  <div class="comment-content">
+                                                    {{reply.noidung}}
+                                                  </div>
+                                                </div>
+                                              </li>
+                                                {% endif %}
+                                              {% endfor %}
+                                            </ul>
+                                          </li>
+                                          {% endfor %}
+                                        </ul>
+                                      </div>
+                                              <ul class="reviews-pages">
+                                                    <li class="active">1</li>
+                                                    <li><a href="#">2</a></li>
+                                                    <li><a href="#">3</a></li>
+                                                    <li><a href="#"><i class="fa fa-caret-right"></i></a></li>
+                                                </ul>
+                                        <div class="col-md-6" style="margin-top: 20px">
+                                            <h4 class="text-uppercase">Write Your Comment</h4>
+                                            <!--
+                                            {% if messages %}
+                                                {% for message in messages %}
+                                                    <div class="alert alert-{{message.tags}}" role="alert">
+                                                        {{ message }}
+                                                    </div>
+                                                {% endfor %}
+                                            {% endif %}
+                                            -->
+                                            <form class="review-form" action="/product/addcomment/{{ product.id }}" method="post">
+                                                {% csrf_token %}
+                                                <div class="form-group" style="width: 800px">
+                                                    <textarea name="comment" class="input" placeholder="Your Comment"></textarea>
+                                                </div>
+                                                {% if user.id is not None %}
+                                                    <button class="primary-btn">Submit</button>
+                                                {% else %}
+                                                    You must be logged in to post a comment
+                                                {% endif %}
+                                            </form>
+
+                                        </div>
+                                    </div>
+                                <!-- End Comment-->
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- /Product Details -->
+            </div>
+            <!-- /row -->
+        </div>
+        <!-- /container -->
+    </div>
+    <!-- /section -->
+{% endblock %}

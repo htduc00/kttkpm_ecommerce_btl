@@ -27,8 +27,11 @@ def login_form(request):
             login(request, user)
             current_user =request.user
             userprofile=UserProfile.objects.get(user_id=current_user.id)
-            request.session['userimage'] = userprofile.image.url
 
+            try:
+                request.session['userimage'] = userprofile.image.url
+            except:
+                request.session['userimage'] = ''
             # Redirect to a success page.
             return HttpResponseRedirect('/')
         else:
