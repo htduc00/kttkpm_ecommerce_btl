@@ -38,10 +38,7 @@ def product_detail(request,id,name):
     #category = Category.objects.all()
 
     product = Product.objects.get(pk=id)
-
     images = Hinhanhsanpham.objects.filter(productid_id=id)
-    comments = Productcomment.objects.filter(productid_id=id)
-    commentReplys = Productcommentreply.objects.all()
     orderDetails = Orderdetail.objects.filter(productid=id)
 
     damua = False
@@ -50,18 +47,29 @@ def product_detail(request,id,name):
             damua = True
             break
 
-    productAttribute = Attributevalue.objects.filter(productid=id)
-
+    productAttributes = Attributevalue.objects.filter(productid=id)
     review_list = Review.objects.filter(productid = id)
     paginator = Paginator(review_list, 4)
     reviews = paginator.page(1)
+    comment_list = Productcomment.objects.filter(productid=id);
+    commentPaginator = Paginator(comment_list,3)
+    comments = commentPaginator.page(1)
+    commentReplys = []
+    for comment in comments:
+        replys = Productcommentreply.objects.filter( productcommentid = comment)
+        commentReplys.extend(list(replys))
+
+    productDiscounts = ProductDiscount.objects.filter(productid=id)
+
+    
     context = {
     			'product': product,
                 'images': images,
                 'comments': comments,
                 'reviews' : reviews,
                 'commentReplys': commentReplys,
-                'damua': damua
+                'damua': damua,
+                'discounts': productDiscounts,
                }
     # if productAttribute != None:
     #     if request.method == 'POST': #if we select color
@@ -78,13 +86,36 @@ def product_detail(request,id,name):
     #     context.update({'sizes': sizes, 'colors': colors,
     #                     'variant': variant,'query': query
     #                     })
+
+    if productAttributes != None:
+        color_size = productAttributes.filter(attributeid__tenthuoctinh = "color-size")
+        colors = []
+        sizes = []
+        for item in color_size:
+            value = item.tenvalue.split("-")
+            if value[0] not in colors:
+                colors.append(value[0])
+            if value[1] not in sizes:
+                sizes.append(value[1])
+        context.update({'color_size':color_size, 'colors':colors, 'sizes':sizes })
     if request.method == 'GET' and request.is_ajax() == False :
         return render(request,'product_detail.html',context)
-    else:
+    elif request.GET.get('type') == "rv":
         page = request.GET.get('page')
         reviews = paginator.page(int(page))
         review_li = list(reviews.object_list.values('taikhoanid__first_name','taikhoanid__last_name','subject','noidung','rating','createdat'))
         result = {'review_li': review_li}
+        return JsonResponse(result)
+    elif request.GET.get('type') == "cm":
+        page = request.GET.get('page')
+        comments = commentPaginator.page(int(page))
+        comment_li = list(comments.object_list.values('id','taikhoanid__first_name','taikhoanid__last_name','noidung','createdat'))
+        commentReplys = []
+        for comment in comments:
+            replys = Productcommentreply.objects.filter( productcommentid = comment).values('productcommentid_id','taikhoanid__last_name','taikhoanid__first_name','noidung','createdat')
+            commentReplys.extend(list(replys))
+        result = {'comment_li': comment_li,
+                    'comment_rep': commentReplys}
         return JsonResponse(result)
 
 def addreview(request,id):
@@ -104,3 +135,33 @@ def addreview(request,id):
             messages.success(request, "Đánh giá của bạn đã được ghi nhận")
             return HttpResponseRedirect(url)
     return HttpResponseRedirect(url)
+
+def addcomment(request,id):
+    url = request.META.get('HTTP_REFERER')
+
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid() :
+            data = Productcomment()
+            data.noidung = form.cleaned_data['noidung']
+            data.productid_id = id
+            data.taikhoanid_id = request.user.id
+            data.createdat = date.today()
+            data.save()
+            messages.success(request, "Bình luận thành công")
+            return HttpResponseRedirect(url)
+
+def addcommentreply(request,id):
+    url = request.META.get('HTTP_REFERER')
+
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid() :
+            data = Productcommentreply()
+            data.noidung = form.cleaned_data['noidung']
+            data.productcommentid_id = id
+            data.taikhoanid_id = request.user.id
+            data.createdat = date.today()
+            data.save()
+            messages.success(request, "Bình luận thành công")
+            return HttpResponseRedirect(url)

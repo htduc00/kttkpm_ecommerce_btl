@@ -1964,3 +1964,71 @@ textarea.input {
     width: 320px;
   }
 }
+
+.comments-container .comments-list .replybox{
+  display:none; 
+  margin-left: 90px; 
+  margin-top: 10px;
+}
+
+/* COUPON TAG */
+.coupon {
+  height: 30px;
+  width: 100px;
+  cursor: pointer;
+  padding: 4px 17px;
+  border: 1px solid rgb(13, 92, 182);
+  border-radius: 4px;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 23px;
+  color: rgb(13, 92, 182);
+  position: relative;
+  margin: 8px 12px 0px 0px;
+}
+.coupon::before {
+  left: -6px;
+  transform: rotate(-45deg);
+}
+.coupon::after {
+  right: -6px;
+  transform: rotate(135deg);
+}
+.coupon::before,.coupon::after {
+  content: "";
+  width: 10px;
+  height: 10px;
+  background-color: rgb(255, 255, 255);
+  border-width: 1px;
+  border-style: solid;
+  border-color: transparent rgb(13, 92, 182) rgb(13, 92, 182) transparent;
+  border-image: initial;
+  position: absolute;
+  top: 50%;
+  margin-top: -5px;
+  border-radius: 50%;
+}
+/*----------------------------------------*/
+.size-span{
+  position: relative; 
+  display: inline-block;
+  width: 55px;
+  height: 30px;
+  background-color:#fff; 
+  margin-bottom: 10px; 
+  border: 1px solid gray;
+  text-align: center;
+  padding-top: 5px; 
+}
+.size-span:hover{
+  cursor: pointer;
+  border:2px solid rgb(13, 92, 182);
+}
+
+.color-span{
+  position: relative;
+  display: inline-block;
+  padding: 20px 20px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
