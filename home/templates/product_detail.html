@@ -89,7 +89,31 @@
                                     <div id="SelectedProduct">
                                         <p><strong>Còn lại:</strong> 100 sản phẩm </p>
                                         <h3 class="product-price">{{product.gia}} VND</h3>
-                                        <div class="qty-input">
+                                        <p style="color:gray; font-size: 12pt;font-family: Arial">
+                                            Chọn màu: 
+                                            <span id = "color" style="color: rgb(36, 36, 36);font-weight: 500;"></span>
+                                        </p>
+                                        {% for cl in colors %}
+                                        <span class = "color-span" style="background-color:{{cl}};" data-color="{{cl}}" onClick="selectColor(this.dataset.color)" ></span>
+                                        {% endfor %}
+                                        <p style="color:gray; font-size: 12pt;font-family: Arial">
+                                            Chọn size: 
+                                            <span id = "size" style="color: rgb(36, 36, 36);font-weight: 500;"></span>
+                                        </p>
+                                        <div style="width: 400px">
+                                        {% for size in sizes %}
+                                            <span class = "size-span" data-size="{{size}}" onClick="selectSize(this.dataset.size)">{{size}}</span>
+                                        {% endfor %}
+                                        </div>
+
+                                        <p style="color: rgb(36, 36, 36);font-weight: 500;font-size: 14pt;font-family: Arial">{{discounts|length}} Mã Giảm Giá</p>
+                                        {% for discount in discounts %}
+                                            <span class="coupon"
+                                                 data-hsd="{{discount.discountid.hsd}}" data-requiree="{{discount.discountid.requiree}}" data-discountvalue="{{discount.discountid.value}}" onClick="DiscountDetail(this.dataset.hsd, this.dataset.requiree, this.dataset.discountvalue)">Giảm {{discount.discountid.value}}K
+                                            </span>
+                                        {% endfor %}
+                                        <br>
+                                        <div class="qty-input" style="margin-top: 20px">
                                             <span class="text-uppercase">Amount: </span>
                                             <input class="input" name="quantity" type="number" value="1" min="1" max="{{ product.amount }}">
                                             <button type="submit" class="primary-btn add-to-cart">
@@ -155,46 +179,12 @@
                                             </div>
                                             <ul class="reviews-pages">
                                                 {% for num in reviews.paginator.page_range %}
-                                                <li><a id="{{num}}" onclick="changePage(this.id)">{{ num }}</a></li>
+                                                <li class="rp" id="rv{{num}}" onClick="changePage(this.id)" style="cursor: pointer;">{{ num }}</li>
                                                 {% endfor %}
                                             </ul>
-                                                <script type="text/javascript">
-                                                    function changePage(id){
-                                                        let page = id; 
-                                                        $.ajax({
-                                                            type: 'get',
-                                                            url: '/product/1/abc/',
-                                                            data: {page: page},
-                                                            success: function(data){
-                                                                console.log(data);
-                                                                let out='';
-                                                                $.each(data.review_li, function(index, review){
-                                                                    out += '<div class="single-review">';
-                                                                    out +='<div class="review-heading">';
-                                                                    out += '<div> <a href="#"><i class="fa fa-user-o"></i> '+review.taikhoanid__first_name+' '+review.taikhoanid__last_name+'</a> </div>';
-                                                                    out += '<div><b>'+ review.subject +'</b> </div>';
-                                                                    out += '<div><a href="#"><i class="fa fa-clock-o"></i> '+review.createdat+'</a></div>';
-                                                                    out += '</div>';
-                                                                    out += '<div class="review-body"><p>'+review.noidung+'</p></div>';
-                                                                    out += '</div>';
-                                                                })
-                                                                $('#review').html(out);
-                                                            }
-                                                        })
-                                                    }
-                                                </script>
                                         </div>
                                         <div class="col-md-6">
                                             <h4 class="text-uppercase">Write Your Review</h4>
-                                            <!--
-                                            {% if messages %}
-                                                {% for message in messages %}
-                                                    <div class="alert alert-{{message.tags}}" role="alert">
-                                                        {{ message }}
-                                                    </div>
-                                                {% endfor %}
-                                            {% endif %}
-                                            -->
                                             <form class="review-form" action="/addreview/{{ product.id }}" method="post">
                                                 {% csrf_token %}
                                                 <div class="form-group">
@@ -242,13 +232,27 @@
                                                 <div class="comment-head">
                                                   <h6 class="comment-name"><a href="#">{{ comment.taikhoanid.first_name }} {{comment.taikhoanid.last_name}}</a></h6>
                                                   <span>{{ comment.createdat }}</span>
-                                                  <i class="fa fa-reply"></i>
+                                                  <i data-replybox="panel{{comment.id}}" class="fa fa-reply" onClick="reply(this.dataset.replybox)"></i>
                                                   <i class="fa fa-heart"></i>
                                                 </div>
                                                 <div class="comment-content">
                                                   {{ comment.noidung }}
                                                 </div>
                                               </div>
+                                            </div>
+                                            <div class = "replybox" id="panel{{comment.id}}">
+                                                <form class="review-form" action="/addcommentreply/{{comment.id}}" method="post">
+                                                    {% csrf_token %}
+                                                    <div class="form-group" style="width: 700px">
+                                                        <textarea name="noidung" class="input" placeholder="Your Reply"></textarea>
+                                                    </div>
+                                                    {% if user.id is not None %}
+                                                        <button class="primary-btn">Submit</button>
+                                                    {% else %}
+                                                        You must be logged in to post a reply
+                                                    {% endif %}
+                                                    <button class="primary-btn cancelbutton" type="button" onClick="cancelreply()">Cancel</button>
+                                                </form>
                                             </div>
                                             <!-- Respuestas de los comentarios -->
                                             <ul class="comments-list reply-list">
@@ -262,7 +266,7 @@
                                                   <div class="comment-head">
                                                     <h6 class="comment-name"><a href="#">{{reply.taikhoanid.first_name}} {{reply.taikhoanid.last_name}}</a></h6>
                                                     <span>{{reply.createdat}}</span>
-                                                    <i class="fa fa-reply"></i>
+                                                    <i data-replybox="panelrep{{comment.id}}" class="fa fa-reply" onClick="reply(this.dataset.replybox)"></i>
                                                     <i class="fa fa-heart"></i>
                                                   </div>
                                                   <div class="comment-content">
@@ -270,6 +274,20 @@
                                                   </div>
                                                 </div>
                                               </li>
+                                                <div class = "replybox" id="panelrep{{comment.id}}">
+                                                    <form class="review-form" action="/addcommentreply/{{comment.id}}" method="post">
+                                                        {% csrf_token %}
+                                                        <div class="form-group" style="width: 700px">
+                                                            <textarea name="noidung" class="input" placeholder="Your Reply"></textarea>
+                                                        </div>
+                                                        {% if user.id is not None %}
+                                                            <button class="primary-btn">Submit</button>
+                                                        {% else %}
+                                                            You must be logged in to post a reply
+                                                        {% endif %}
+                                                        <button class="primary-btn cancelbutton" type="button" onClick="cancelreply()">Cancel</button>
+                                                    </form>
+                                                </div>
                                                 {% endif %}
                                               {% endfor %}
                                             </ul>
@@ -277,27 +295,17 @@
                                           {% endfor %}
                                         </ul>
                                       </div>
-                                              <ul class="reviews-pages">
-                                                    <li class="active">1</li>
-                                                    <li><a href="#">2</a></li>
-                                                    <li><a href="#">3</a></li>
-                                                    <li><a href="#"><i class="fa fa-caret-right"></i></a></li>
-                                                </ul>
+                                    <ul class="reviews-pages">
+                                        {% for num in comments.paginator.page_range %}
+                                        <li class="cp" id="cm{{num}}" onClick="changePage(this.id)" style="cursor: pointer;">{{ num }}</li>
+                                        {% endfor %}
+                                    </ul>
                                         <div class="col-md-6" style="margin-top: 20px">
                                             <h4 class="text-uppercase">Write Your Comment</h4>
-                                            <!--
-                                            {% if messages %}
-                                                {% for message in messages %}
-                                                    <div class="alert alert-{{message.tags}}" role="alert">
-                                                        {{ message }}
-                                                    </div>
-                                                {% endfor %}
-                                            {% endif %}
-                                            -->
-                                            <form class="review-form" action="/product/addcomment/{{ product.id }}" method="post">
+                                            <form class="review-form" action="/addcomment/{{ product.id }}" method="post">
                                                 {% csrf_token %}
                                                 <div class="form-group" style="width: 800px">
-                                                    <textarea name="comment" class="input" placeholder="Your Comment"></textarea>
+                                                    <textarea name="noidung" class="input" placeholder="Your Comment"></textarea>
                                                 </div>
                                                 {% if user.id is not None %}
                                                     <button class="primary-btn">Submit</button>
@@ -321,4 +329,112 @@
         <!-- /container -->
     </div>
     <!-- /section -->
+    <script type="text/javascript">
+        $('#rv1').addClass("active");
+        $('#cm1').addClass("active");
+        function changePage(id){
+            let page = id.substring(2,3);
+            let type =  id.substring(0,2);
+            if(type == "rv"){
+                $('.rp').removeClass("active");
+                $('#'+id).addClass("active");
+                $.ajax({
+                    type: 'get',
+                    url: '/product/'+"{{product.id}}"+'/'+"{{product.ten}}"+'/', 
+                    data: {page: page, type: type},
+                    success: function(data){
+                        let out='';
+                        $.each(data.review_li, function(index, review){
+                            out += '<div class="single-review">';
+                            out +='<div class="review-heading">';
+                            out += '<div> <a href="#"><i class="fa fa-user-o"></i> '+review.taikhoanid__first_name+' '+review.taikhoanid__last_name+'</a> </div>';
+                            out += '<div><b>'+ review.subject +'</b> </div>';
+                            out += '<div><a href="#"><i class="fa fa-clock-o"></i> '+review.createdat+'</a></div> \n';
+                            out +='<div class="review-rating pull-right"> \n';
+                            for(var i = 1; i<=5; i++){
+                                if( review.rating >= i)
+                                    out +='<i class="fa fa-star"></i> \n';
+                                else
+                                    out +='<i class="fa fa-star-o empty"></i> \n';
+                            }
+                            out += '</div> \n';
+                            out += '</div> \n';
+                            out += '<div class="review-body"><p>'+review.noidung+'</p></div> \n';
+                            out += '</div>';
+                        })
+                        $('#review').html(out);
+                    }
+                })
+            }
+            if(type == "cm"){
+                $('.cp').removeClass("active");
+                $('#'+id).addClass("active");
+                $.ajax({
+                    type: 'get',
+                    url: '/product/'+"{{product.id}}"+'/'+"{{product.ten}}"+'/', 
+                    data: {page: page, type: type},
+                    success: function(data){
+                        let out='';
+                        $.each(data.comment_li, function(index, comment){
+                            out += '<li>';
+                            out +='<div class="comment-main-level">';
+                            out +='<div class="comment-avatar"><img src="http://i9.photobucket.com/albums/a88/creaticode/avatar_1_zps8e1c80cd.jpg" alt=""></div>';
+                            out += '<div class="comment-box">';
+                            out +='<div class="comment-head">';
+                            out +='<h6 class="comment-name"><a href="#">'+comment.taikhoanid__first_name+' '+comment.taikhoanid__last_name+'</a></h6>';
+                            out +='<span>'+comment.createdat+'</span>';
+                            out +='<i data-replybox ="panel'+comment.id+'" class="fa fa-reply" onClick="reply(this.dataset.replybox)"></i> <i class="fa fa-heart"></i> </div>';
+                            out += '<div class="comment-content">'+comment.noidung+'</div> </div> </div>';
+                            out += '<div class = "replybox" id="panel'+comment.id+'">';
+                            out +='<form class="review-form" action="/addcommentreply/'+comment.id+'" method="post">';
+                            out +='{% csrf_token %}';
+                            out +='<div class="form-group" style="width: 700px"> <textarea name="noidung" class="input" placeholder="Your Reply"></textarea> </div> {% if user.id is not None %} <button class="primary-btn">Submit</button> {% else %} You must be logged in to post a reply {% endif %} <button class="primary-btn cancelbutton" type="button" onClick="cancelreply()">Cancel</button> </form> </div>';
+                            out +='<ul class="comments-list reply-list">';
+                            for(var i = 0; i< data.comment_rep.length; i++){
+                                let reply = data.comment_rep[i];
+                                if(reply.productcommentid_id == comment.id){
+                                    out += '<li>';
+                                    out += '<div class="comment-avatar"><img src="http://i9.photobucket.com/albums/a88/creaticode/avatar_2_zps7de12f8b.jpg" alt=""></div>';
+                                    out += '<div class="comment-box">';
+                                    out +='<div class="comment-head">';
+                                    out +='<h6 class="comment-name"><a href="#">'+reply.taikhoanid__first_name+' '+reply.taikhoanid__last_name+'</a></h6>';
+                                    out += '<span>'+reply.createdat+'</span>';
+                                    out += '<i data-replybox="panelrep'+comment.id+'" class="fa fa-reply" onClick="reply(this.dataset.replybox)"></i> <i class="fa fa-heart"></i> </div>';
+                                    out +='<div class="comment-content">'+reply.noidung+' </div> </div> </li>';
+                                    out+='<div class = "replybox" id="panelrep'+comment.id+'">';
+                                    out+=' <form class="review-form" action="/addcommentreply/'+comment.id+'" method="post">';
+                                    out+=' {% csrf_token %} <div class="form-group" style="width: 700px"> <textarea name="noidung" class="input" placeholder="Your Reply"></textarea> </div> {% if user.id is not None %} <button class="primary-btn">Submit</button> {% else %} You must be logged in to post a reply {% endif %} <button class="primary-btn cancelbutton" type="button" onClick="cancelreply()">Cancel</button> </form> </div>';
+                                }        
+                            }
+                            out+='</ul>';
+                            out += '</li>';
+                        });
+                        $('#comments-list').html(out);
+                    }
+                })
+            }
+        }
+    </script>
+
+    <script type="text/javascript">
+        function reply(id){
+            $('.replybox').hide();
+            $('#'+id).toggle();
+        }
+        function cancelreply(){
+            $('.replybox').hide();
+        }
+
+        function DiscountDetail(hsd,requiree,value){
+            
+        }
+
+        function selectSize(size){
+            $('#size').text(size);
+        }
+        function selectColor(color){
+            console.log(color)
+            $('#color').text(color);
+        }
+    </script>
 {% endblock %}

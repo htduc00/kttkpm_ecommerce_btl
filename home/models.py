@@ -139,7 +139,7 @@ class Dientutype(models.Model):
 class Discount(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True)  # Field name made lowercase.
     hsd = models.DateField(db_column='Hsd')  # Field name made lowercase.
-    value = models.FloatField(db_column='Value')  # Field name made lowercase.
+    value = models.IntegerField(db_column='Value')  # Field name made lowercase.
     requiree = models.FloatField(db_column='Requiree')  # Field name made lowercase.
 
     class Meta:
@@ -375,6 +375,7 @@ class Product(models.Model):
         return count
 
 class ProductDiscount(models.Model):
+    id = models.AutoField(db_column='ID', primary_key=True)
     productid = models.ForeignKey(Product, models.DO_NOTHING, db_column='ProductID')  # Field name made lowercase.
     discountid = models.ForeignKey(Discount, models.DO_NOTHING, db_column='DiscountID')  # Field name made lowercase.
 
@@ -409,7 +410,7 @@ class Productcommentreply(models.Model):
 class Productcommentreplyreaction(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True)  # Field name made lowercase.
     taikhoanid = models.ForeignKey(User, models.DO_NOTHING, db_column='TaiKhoanID')  # Field name made lowercase.
-    productcommentreplyid = models.ForeignKey(Productcommentreply, models.DO_NOTHING, db_column='ProductCommentReplyID')  # Field name made lowercase.
+    productcommentreplyid = models.ForeignKey(Productcommentreply, models.DO_NOTHING, db_column ='ProductCommentReplyID')  # Field name made lowercase.
     reaction = models.CharField(db_column='Reaction', max_length=255, blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
