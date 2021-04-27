@@ -41,8 +41,6 @@ def product_detail(request,id,name):
         if detail.orderid.taikhoanid == request.user:
             damua = True
             break
-
-    productAttributes = Attributevalue.objects.filter(productid=id)
     review_list = Review.objects.filter(productid = id)
     paginator = Paginator(review_list, 4)
     reviews = paginator.page(1)
@@ -81,18 +79,28 @@ def product_detail(request,id,name):
     #     context.update({'sizes': sizes, 'colors': colors,
     #                     'variant': variant,'query': query
     #                     })
-
+    productAttributes = Attributevalue.objects.filter(productid=id)
     if productAttributes != None:
-        color_size = productAttributes.filter(attributeid__tenthuoctinh = "color-size")
         colors = []
         sizes = []
-        for item in color_size:
-            value = item.tenvalue.split("-")
-            if value[0] not in colors:
-                colors.append(value[0])
-            if value[1] not in sizes:
-                sizes.append(value[1])
-        context.update({'color_size':list(color_size.values()), 'colors':colors, 'sizes':sizes })
+        color_size = productAttributes.filter(attributeid__tenthuoctinh = "color-size")
+        colorAttribute = productAttributes.filter(attributeid__tenthuoctinh = "color")
+        sizeAttribute = productAttributes.filter(attributeid__tenthuoctinh = "size")
+        if(color_size):
+            for item in color_size:
+                value = item.tenvalue.split("-")
+                if value[0] not in colors:
+                    colors.append(value[0])
+                if value[1] not in sizes:
+                    sizes.append(value[1])
+        else:
+                for item in colorAttribute:
+                    colors.append(item.tenvalue)
+                for item in sizeAttribute:
+                    sizes.append(item.tenvalue)
+        print(colors)
+        print(sizes)
+        context.update({'color_size':list(color_size.values()),'colorAttribute':list(colorAttribute.values()),'sizeAttribute':list(sizeAttribute.values()), 'colors':colors, 'sizes':sizes })
     if request.method == 'GET' and request.is_ajax() == False :
         return render(request,'product_detail.html',context)
     elif request.GET.get('type') == "rv":
