@@ -222,7 +222,11 @@
 										{% for rs in products %}
 										<tr>
 											<td class="thumb"><a href="#">
-													<img src="{{ rs.hinhanh.url }}" alt="" style="height: 100px">
+													{% if rs.hinhanh %}
+														<img src="{{ rs.hinhanh.url }}" alt="" style="height: 100px">
+													{% else %}
+														<img src="" alt="" style="height: 100px">
+													{% endif %}
 												</a></td>
 											<td class="details"> <a href="#">{{ rs.ten }}</a> </td>
 											<td class="price text-center"><strong>{{ rs.gia }} đ</strong><br><del
