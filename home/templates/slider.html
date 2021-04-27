@@ -11,7 +11,11 @@
 					{% for rs in products_slider %}
                     <!-- banner -->
 					<div class="banner banner-1" >
-						<img src="{{ rs.hinhanh.url }}" alt="" style="height:500px;">
+						{% if rs.hinhanh %}
+							<img src="{{ rs.hinhanh.url }}" alt="" style="height:500px;">
+						{% else %}
+							<img src="/images/placeholder.jpg" alt="" style="height:500px;">
+						{% endif %}
 						<div class="banner-caption text-center">
 							<h1>{{rs.ten}}</h1>
 							<h3 class="white-color font-weak">{{rs.gia}}</h3>

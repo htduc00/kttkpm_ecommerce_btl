@@ -20,7 +20,11 @@
                     <div class="product product-single">
                         <div class="product-thumb">
                             <a href="#" class="main-btn quick-view"><i class="fa fa-search-plus"></i> Quick view</a>
-                            <img src="{{ rs.hinhanh.url }}" alt="" style="height: 200px">
+                            {% if rs.hinhanh %}
+                                <img src="{{ rs.hinhanh.url }}" alt="" style="height: 200px">
+                            {% else %}
+                                <img src="/images/placeholder.jpg" alt="" style="height: 200px">
+                            {% endif %}
                         </div>
                         <div class="product-body">
                             <h3 class="product-price"></h3>
@@ -70,7 +74,11 @@
                     <div class="product product-single">
                         <div class="product-thumb">
                             <a href="#" class="main-btn quick-view"><i class="fa fa-search-plus"></i> Quick view</a>
-                            <img src="{{ rs.hinhanh.url }}" alt="" style="height: 200px">
+                            {% if rs.hinhanh %}
+                                <img src="{{ rs.hinhanh.url }}" alt="" style="height: 200px">
+                            {% else %}
+                                <img src="/images/placeholder.jpg" alt="" style="height: 200px">
+                            {% endif %}
                         </div>
                         <div class="product-body">
                             <h3 class="product-price"></h3>

@@ -15,7 +15,7 @@
 
   menuToggle.on('click', function() {
     catList.removeClass('open');
-    menuList.toggleClass('open');
+    menuList.toggle('open');
   });
 
   $(document).click(function(event) {
