@@ -16,6 +16,9 @@ class ProductCommentAdmin(admin.ModelAdmin):
 class ProductCommentReplyAdmin(admin.ModelAdmin):
     list_display = ['productcommentid','user_profile','noidung','createdat']
 
+class ProductDiscountAdmin(admin.ModelAdmin):
+    list_display = ['productid','discountid']
+
 admin.site.register(Product)
 admin.site.register(Tacgia)
 admin.site.register(Nhaxuatban)
@@ -37,6 +40,6 @@ admin.site.register(Shipment)
 admin.site.register(Paymentmethod)
 admin.site.register(Donvivanchuyen)
 admin.site.register(Discount, DiscountAdmin)
-admin.site.register(ProductDiscount)
+admin.site.register(ProductDiscount,ProductDiscountAdmin)
 admin.site.register(Attribute)
 admin.site.register(Attributevalue)
