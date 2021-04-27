@@ -1,30 +1,18 @@
 {% load static %}
-
+{% load i18n %}
 <header>
     <!-- top Header -->
     <div id="top-header">
         <div class="container">
             <div class="pull-left">
-                <span>"Welcome to E-shop!"</span>
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{message.tags}}" role="alert">
-                            {{ message |safe }}
-                        </div>
-                    {% endfor %}
-                {% endif %}
+                <span>Welcome to E-shop!</span>
             </div>
-
-
-
 
             <div class="pull-right">
                 <ul class="header-top-links">
                     <li><a href="#">Store</a></li>
                     <li><a href="#">Newsletter</a></li>
                     <li><a href="#">FAQ</a></li>
-                    
-
                 </ul>
             </div>
         </div>
@@ -37,7 +25,7 @@
             <div class="pull-left">
                 <!-- Logo -->
                 <div class="header-logo">
-                    <a class="logo" href="#">
+                    <a class="logo" href="{% url 'home' %}">
                         <img src="{% static '' %}img/logo.png" alt="">
                     </a>
                 </div>
@@ -60,21 +48,22 @@
 
                 <!-- Search -->
                 <div class="header-search">
-                    <form action="/search/" method="post">
+                    <form action="/home/search/" method="post">
                         {% csrf_token %}
                         <input id="query" name="query" class="input search-input" type="text" placeholder="Enter your keyword">
-                        <select name="type"  class="input search-categories">
+                        <select name="type" class="input search-categories">
                             <option value="0">All Categories</option>
-                            <option value="book">Book</option>
-                            <option value="electro">Electro</option>
-                            <option value="clothes">Clothes</option>
+                            <option value="book">Sách</option>
+                            <option value="electro">Điện tử</option>
+                            <option value="clothes">Áo quần</option>
                         </select>
                         <button class="search-btn"><i class="fa fa-search"></i></button>
                     </form>
                 </div>
                 <!-- /Search -->
-
             </div>
+
+
             <div class="pull-right" >
                 <ul class="header-btns">
                     <!-- Account -->
@@ -87,35 +76,32 @@
                                 <strong class="text-uppercase">{{ user.first_name }} <i class="fa fa-caret-down"></i></strong>
                             </div>
                         {% else %}
-                            <a href="#" class="text-uppercase">Login</a> / <a href="#" class="text-uppercase">Sign Up</a>
+                            <a href="{% url 'login' %}" class="text-uppercase">Login</a> / <a href="{% url 'signup' %}" class="text-uppercase">Sign Up</a>
                         {% endif %}
 
                         <ul class="custom-menu">
-                            <li><a href="#"><i class="fa fa-user-o"></i> My Account</a></li>
-                            <li><a href="#"><i class="fa fa-heart-o"></i>My Favorites</a></li>
-                            <li><a href="#"><i class="fa fa-exchange"></i>My Orders</a></li>
-                            <li><a href="#"><i class="fa fa-check"></i>My Comments</a></li>
-                            <li><a href="#"><i class="fa fa-unlock-alt"></i>Logout</a></li>
-
+                            <li><a href="{% url 'user_index' %}"><i class="fa fa-user-o"></i>My Account</a></li>
+                            <li><a href="#"><i class="fa fa-heart-o"></i>My Favorits</a></li>
+                            <li><a ><i class="fa fa-exchange"></i>My Orders</a></li>
+                            <li><a ><i class="fa fa-check"></i>My Comments</a></li>
+                            <li><a href="{% url 'logout' %}"><i class="fa fa-unlock-alt"></i>Logout</a></li>
                         </ul>
                     </li>
                     <!-- /Account -->
 
                     <!-- Cart -->
                     <li class="header-cart dropdown default-dropdown">
-                        <a href="#" >
+
+                        <a href="#">
                             <div class="header-btns-icon">
                                 <i class="fa fa-shopping-cart"></i>
-                                {% comment %}     
-                                    {% load myapptags %}
-                                    {% shopcartcount user.id as count %}
-                                {% endcomment %}
+
+
 
                                 <span class="qty">{{ count }}</span>
                             </div>
                             <strong class="text-uppercase">My Cart:</strong>
                             <br>
-
                         </a>
 
                     </li>
