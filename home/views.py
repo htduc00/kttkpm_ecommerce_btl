@@ -28,7 +28,7 @@ def index(request):
 
 
 
-def product_detail(request,id,name):
+def product_detail(request,id,slug):
     #query = request.GET.get('q')
     #category = Category.objects.all()
 
@@ -41,20 +41,26 @@ def product_detail(request,id,name):
         if detail.orderid.taikhoanid == request.user:
             damua = True
             break
+
+    productAttributes = Attributevalue.objects.filter(productid=id)
+
+    #Review Paging
     review_list = Review.objects.filter(productid = id)
     paginator = Paginator(review_list, 4)
     reviews = paginator.page(1)
-    comment_list = Productcomment.objects.filter(productid=id);
-    commentPaginator = Paginator(comment_list,3)
+
+    #Comment Paging
+    comment_list = Productcomment.objects.filter(productid = id)
+    commentPaginator = Paginator(comment_list, 3)
     comments = commentPaginator.page(1)
     commentReplys = []
+
     for comment in comments:
-        replys = Productcommentreply.objects.filter( productcommentid = comment)
+        replys = Productcommentreply.objects.filter(productcommentid = comment)
         commentReplys.extend(list(replys))
 
     productDiscounts = ProductDiscount.objects.filter(productid=id)
 
-    
     context = {
     			'product': product,
                 'images': images,
@@ -106,16 +112,16 @@ def product_detail(request,id,name):
     elif request.GET.get('type') == "rv":
         page = request.GET.get('page')
         reviews = paginator.page(int(page))
-        review_li = list(reviews.object_list.values('taikhoanid__first_name','taikhoanid__last_name','subject','noidung','rating','createdat'))
+        review_li = list(reviews.object_list.values('user_profile__first_name','user_profile__last_name','subject','noidung','rating','createdat'))
         result = {'review_li': review_li}
         return JsonResponse(result)
     elif request.GET.get('type') == "cm":
         page = request.GET.get('page')
         comments = commentPaginator.page(int(page))
-        comment_li = list(comments.object_list.values('id','taikhoanid__first_name','taikhoanid__last_name','noidung','createdat'))
+        comment_li = list(comments.object_list.values('id','user_profile__hovaten','noidung','createdat','user_profile__image'))
         commentReplys = []
         for comment in comments:
-            replys = Productcommentreply.objects.filter( productcommentid = comment).values('productcommentid_id','taikhoanid__last_name','taikhoanid__first_name','noidung','createdat')
+            replys = Productcommentreply.objects.filter( productcommentid = comment).values('productcommentid_id','user_profile__hovaten','noidung','createdat','user_profile__image')
             commentReplys.extend(list(replys))
         result = {'comment_li': comment_li,
                     'comment_rep': commentReplys}
@@ -148,7 +154,7 @@ def addcomment(request,id):
             data = Productcomment()
             data.noidung = form.cleaned_data['noidung']
             data.productid_id = id
-            data.taikhoanid_id = request.user.id
+            data.user_profile= UserProfile.objects.get(user_id = request.user.id)
             data.createdat = date.today()
             data.save()
             messages.success(request, "Bình luận thành công")
@@ -163,7 +169,7 @@ def addcommentreply(request,id):
             data = Productcommentreply()
             data.noidung = form.cleaned_data['noidung']
             data.productcommentid_id = id
-            data.taikhoanid_id = request.user.id
+            data.user_profile = UserProfile.objects.get(user_id = request.user.id)
             data.createdat = date.today()
             data.save()
             messages.success(request, "Bình luận thành công")

@@ -359,7 +359,7 @@ class Product(models.Model):
     chitietsp = RichTextUploadingField(db_column='ChiTietSP', blank=True, null=True)  # Field name made lowercase.
     hinhanh = models.ImageField(db_column='HinhAnh', blank=True, null=True)  # Field name made lowercase.
     type = models.CharField(db_column='Type', max_length=255, blank=True, null=True)  # Field name made lowercase.
-
+    slug = models.TextField(db_column='Slug', max_length=255, blank=True, null=True)
     class Meta:
         managed = False
         db_table = 'product'
@@ -400,7 +400,7 @@ class ProductDiscount(models.Model):
 
 class Productcomment(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True)  # Field name made lowercase.
-    taikhoanid = models.ForeignKey(User, models.DO_NOTHING, db_column='TaiKhoanID')  # Field name made lowercase.
+    user_profile = models.ForeignKey('UserProfile', models.DO_NOTHING, db_column='UserProfileID')  # Field name made lowercase.
     noidung = models.CharField(db_column='NoiDung', max_length=255, blank=True, null=True)  # Field name made lowercase.
     createdat = models.DateField(db_column='CreatedAt', blank=True, null=True)  # Field name made lowercase.
     productid = models.ForeignKey(Product, models.DO_NOTHING, db_column='ProductID')  # Field name made lowercase.
@@ -412,7 +412,7 @@ class Productcomment(models.Model):
 
 class Productcommentreply(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True)  # Field name made lowercase.
-    taikhoanid = models.ForeignKey(User, models.DO_NOTHING, db_column='TaiKhoanID')  # Field name made lowercase.
+    user_profile = models.ForeignKey('UserProfile', models.DO_NOTHING, db_column='UserProfileID')  # Field name made lowercase.
     productcommentid = models.ForeignKey(Productcomment, models.DO_NOTHING, db_column='ProductCommentID')  # Field name made lowercase.
     noidung = models.CharField(db_column='NoiDung', max_length=255, blank=True, null=True)  # Field name made lowercase.
     createdat = models.DateField(db_column='CreatedAt', blank=True, null=True)  # Field name made lowercase.
@@ -574,7 +574,7 @@ class Taikhoan(models.Model):
         db_table = 'taikhoan'
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, db_column="user_id")
 
     hovaten = models.CharField(db_column='HoVaTen', max_length=255, blank=True, null=True)  # Field name made lowercase.
     	
