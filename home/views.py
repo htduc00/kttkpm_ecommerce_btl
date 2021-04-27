@@ -162,9 +162,30 @@ def addcommentreply(request,id):
             return HttpResponseRedirect(url)
 
 
-def category_products(request,type):
-    # catdata = Category.objects.get(pk=id)
-    products = Product.objects.filter(type=type) #default language
+def category_products(request, type, theloai):
+    try:
+        if type == 'book':
+            products = Product.objects.raw(
+                'SELECT * '
+                'FROM product as p '
+                'LEFT JOIN sachtype s on p.id = s.ProductID '
+                'WHERE s.TheLoaiSachID = %s', [theloai])
+        elif type == 'electro':
+            products = Product.objects.raw(
+                'SELECT * '
+                'FROM product as p '
+                'LEFT JOIN dientutype d on p.id = d.ProductID '
+                'WHERE d.ChiTietTheLoaiDienTuID = %s', [theloai])
+        elif type == 'aoquan':
+            products = Product.objects.raw(
+                'SELECT * '
+                'FROM product as p '
+                'LEFT JOIN aoquan a on p.id = a.ProductID '
+                'WHERE a.TheLoaiQuanAoID = %s', [theloai])
+        else:
+            products = None
+    except:
+        pass
     # try:
     #     products = Product.objects.raw(
     #         'SELECT p.id,p.price,p.amount,p.image,p.variant,l.title, l.keywords, l.description,l.slug,l.detail '
@@ -174,12 +195,10 @@ def category_products(request,type):
     #         'WHERE p.category_id=%s and l.lang=%s', [id])
     # except:
     #     pass
-    # catdata = CategoryLang.objects.get(category_id=id, lang=currentlang)
 
     context={'products': products,
             'productType': type }
-             #'category':category,
-            #  'catdata':catdata }
+
     return render(request,'category_products.html',context)
 
 

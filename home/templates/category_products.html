@@ -221,14 +221,16 @@
 
 										{% for rs in products %}
 										<tr>
-											<td class="thumb"><a href="#">
+											<td class="thumb">
+												<a href="/product/{{ rs.id }}/{{ rs.slug }}">
 													{% if rs.hinhanh %}
 														<img src="{{ rs.hinhanh.url }}" alt="" style="height: 100px">
 													{% else %}
 														<img src="" alt="" style="height: 100px">
 													{% endif %}
-												</a></td>
-											<td class="details"> <a href="#">{{ rs.ten }}</a> </td>
+												</a>
+											</td>
+											<td class="details"> <a href="/product/{{ rs.id }}/{{ rs.slug }}">{{ rs.ten }}</a> </td>
 											<td class="price text-center"><strong>{{ rs.gia }} đ</strong><br><del
 													class="font-weak"><small>$40.00</small></del></td>
 											<td class="qty text-center"><input class="input" type="number" value="1"></td>

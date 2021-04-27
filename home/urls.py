@@ -6,7 +6,7 @@ from django.conf import settings
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('category/<str:type>', views.category_products, name='category_products'),
+    path('category/<str:type>/<int:theloai>', views.category_products, name='category_products'),
     path('search/', views.search, name='search')
 ]
 

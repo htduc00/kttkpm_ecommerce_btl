@@ -30,3 +30,7 @@ admin.site.register(Discount)
 admin.site.register(ProductDiscount)
 admin.site.register(Attribute)
 admin.site.register(Attributevalue)
+
+admin.site.register(Theloaidientu)
+admin.site.register(Theloaiquanao)
+
