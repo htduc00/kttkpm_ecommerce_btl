@@ -2009,6 +2009,83 @@ textarea.input {
   border-radius: 50%;
 }
 
+.coupon_list_title{
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.img_logo_store{
+  position: relative;
+  width: 60px;
+  height: 60px;
+}
+
+.store_name_div{
+    margin: 4px 4px 0px;
+    text-align: center;
+}
+
+.coupon_left .img_logo_store > a {
+    width: 100%;
+    position: relative;
+    display: flex;
+    -webkit-box-align: center;
+    align-items: center;
+}
+
+.coupon_left .img_logo_store > a > div {
+    width: 100%;
+    padding-bottom: calc(100%);
+    position: relative;
+}
+
+.coupon_left .img_logo_store > a > div > img {
+    width: 60px;
+    height: 60px;
+}
+
+
+.store_name_p{
+  display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 0px;
+    margin: 0px;
+    padding: 0px;
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 16px;
+    max-height: 32px;
+    -webkit-line-clamp: 2;
+    color: rgb(36, 36, 36);
+}
+
+.coupon_list_close{
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    position: absolute;
+    text-align: center;
+    right: 32px;
+    top: 24px;
+    cursor: pointer;
+}
+
+.modal_header{
+    padding: 24px 32px 16px;
+    position: relative;
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.modal_body{
+    height: calc(75vh - 71px);
+    overflow-y: scroll;
+    padding: 5px 32px;
+}
+
 .coupon_line{
   box-shadow: #4A4E5A 0px 8px 24px;
   position: absolute;
