@@ -33,7 +33,7 @@ def index(request):
 
 
 
-def product_detail(request,id,name):
+def product_detail(request,id,slug):
     #query = request.GET.get('q')
     #category = Category.objects.all()
 
@@ -48,20 +48,24 @@ def product_detail(request,id,name):
             break
 
     productAttributes = Attributevalue.objects.filter(productid=id)
+
+    #Review Paging
     review_list = Review.objects.filter(productid = id)
     paginator = Paginator(review_list, 4)
     reviews = paginator.page(1)
-    comment_list = Productcomment.objects.filter(productid=id);
-    commentPaginator = Paginator(comment_list,3)
+
+    #Comment Paging
+    comment_list = Productcomment.objects.filter(productid = id)
+    commentPaginator = Paginator(comment_list, 3)
     comments = commentPaginator.page(1)
     commentReplys = []
+
     for comment in comments:
-        replys = Productcommentreply.objects.filter( productcommentid = comment)
+        replys = Productcommentreply.objects.filter(productcommentid = comment)
         commentReplys.extend(list(replys))
 
     productDiscounts = ProductDiscount.objects.filter(productid=id)
 
-    
     context = {
     			'product': product,
                 'images': images,

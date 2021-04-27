@@ -63,11 +63,12 @@ def signup_form(request):
 
             #The thanh vien
             sothe = '{} | {}'.format(current_user.id, randrange(10000))
-           
+            
             UserProfile.objects.create(
             user=current_user,
             thethanhvien=Thethanhvien.objects.create(sothe=sothe, diemtichluy=0, loaithe='Origin'),
-            role = Role.objects.get(pk = 1)
+            role = Role.objects.get(pk = 1),
+            image="placeholder.jpg"
             )
             messages.success(request, 'Your account has been created!')
             return HttpResponseRedirect('/')

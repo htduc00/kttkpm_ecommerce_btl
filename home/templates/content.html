@@ -19,7 +19,7 @@
                 <div class="col-md-3 col-sm-6 col-xs-6">
                     <div class="product product-single">
                         <div class="product-thumb">
-                            <a href="#" class="main-btn quick-view"><i class="fa fa-search-plus"></i> Quick view</a>
+                            <a href="{% url 'product_detail' rs.id rs.slug %}" class="main-btn quick-view"><i class="fa fa-search-plus"></i> Quick view</a>
                             <img src="{{ rs.hinhanh.url }}" alt="" style="height: 200px">
                         </div>
                         <div class="product-body">
@@ -69,7 +69,7 @@
                 <div class="col-md-3 col-sm-6 col-xs-6">
                     <div class="product product-single">
                         <div class="product-thumb">
-                            <a href="#" class="main-btn quick-view"><i class="fa fa-search-plus"></i> Quick view</a>
+                            <a href="{% url 'product_detail' rs.id rs.slug %}" class="main-btn quick-view"><i class="fa fa-search-plus"></i> Quick view</a>
                             <img src="{{ rs.hinhanh.url }}" alt="" style="height: 200px">
                         </div>
                         <div class="product-body">

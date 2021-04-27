@@ -359,7 +359,7 @@ class Product(models.Model):
     chitietsp = RichTextUploadingField(db_column='ChiTietSP', blank=True, null=True)  # Field name made lowercase.
     hinhanh = models.ImageField(db_column='HinhAnh', blank=True, null=True)  # Field name made lowercase.
     type = models.CharField(db_column='Type', max_length=255, blank=True, null=True)  # Field name made lowercase.
-
+    slug = models.TextField(db_column='Slug', max_length=255, blank=True, null=True)
     class Meta:
         managed = False
         db_table = 'product'
