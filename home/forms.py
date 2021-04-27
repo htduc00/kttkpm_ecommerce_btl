@@ -1,11 +1,10 @@
 from django import forms
-from django.forms import ModelForm
+from django.forms import Form, ModelForm
 from .models import *
 
 class SearchForm(forms.Form):
     query = forms.CharField(max_length=100)
-    catid = forms.IntegerField()
-    
+    type = forms.CharField()
 
 class ReviewForm(ModelForm):
     class Meta:

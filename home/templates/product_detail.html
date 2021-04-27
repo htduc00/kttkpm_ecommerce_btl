@@ -74,7 +74,7 @@
 
 
 
-                                <a href="#tab1"> {{ product.countreview}}  Review(s) / Add Review</a>
+                                <a onclick="toReview()" href="#tab2"> {{ product.countreview}}  Review(s) / Add Review</a>
                             </div>
                             {% if product.type == "Book" %}
                             <p><strong>Tác giả:</strong> <a href="#" style = "color: blue">Keigo</a> </p>
@@ -87,29 +87,55 @@
                                 <form action="/order/addtoshopcart/{{ product.id }}" method="post"  id="post-form">
                                     {% csrf_token %}
                                     <div id="SelectedProduct">
-                                        <p><strong>Còn lại:</strong> 100 sản phẩm </p>
-                                        <h3 class="product-price">{{product.gia}} VND</h3>
-                                        <p style="color:gray; font-size: 12pt;font-family: Arial">
-                                            Chọn màu: 
-                                            <span id = "color" style="color: rgb(36, 36, 36);font-weight: 500;"></span>
+                                        <p>
+                                            <strong>Còn lại:</strong> 
+                                            <span id ="remain" style="color: red"></span> 
                                         </p>
-                                        {% for cl in colors %}
-                                        <span class = "color-span" style="background-color:{{cl}};" data-color="{{cl}}" onClick="selectColor(this.dataset.color)" ></span>
-                                        {% endfor %}
-                                        <p style="color:gray; font-size: 12pt;font-family: Arial">
-                                            Chọn size: 
-                                            <span id = "size" style="color: rgb(36, 36, 36);font-weight: 500;"></span>
-                                        </p>
-                                        <div style="width: 400px">
-                                        {% for size in sizes %}
-                                            <span class = "size-span" data-size="{{size}}" onClick="selectSize(this.dataset.size)">{{size}}</span>
-                                        {% endfor %}
-                                        </div>
+                                        <h3 class="product-price" id="price" >{{product.gia}} VND</h3>
+                                        {% if color_size %}
+                                            <p style="color:gray; font-size: 12pt;font-family: Arial">
+                                                Chọn màu: 
+                                                <span id = "color" style="color: rgb(36, 36, 36);font-weight: 500;"></span>
+                                            </p>
+                                            {% for cl in colors %}
+                                            <span class = "color-span" style="background-color:{{cl}};" data-color="{{cl}}" onClick="selectColor(this.dataset.color)" ></span>
+                                            {% endfor %}
+                                            <p style="color:gray; font-size: 12pt;font-family: Arial">
+                                                Chọn size: 
+                                                <span id = "size" style="color: rgb(36, 36, 36);font-weight: 500;"></span>
+                                            </p>
+                                            <div class = "list-group" style="width: 400px">
+                                            {% for size in sizes %}
+                                                <span class = "size-span list-group-item" data-size="{{size}}" onClick="selectSize(this.dataset.size)">{{size}}</span>
+                                            {% endfor %}
+                                            </div>
+                                        {% elif colorAttribute %}
+                                            <p style="color:gray; font-size: 12pt;font-family: Arial">
+                                                Chọn màu: 
+                                                <span id = "color" style="color: rgb(36, 36, 36);font-weight: 500;"></span>
+                                            </p>
+                                            {% for cl in colors %}
+                                            <span class = "color-span" style="background-color:{{cl}};" data-color="{{cl}}" onClick="selectColor(this.dataset.color)" ></span>
+                                            {% endfor %}
+                                        {% elif sizeAttribute %}
+                                            <p style="color:gray; font-size: 12pt;font-family: Arial">
+                                                Chọn size: 
+                                                <span id = "size" style="color: rgb(36, 36, 36);font-weight: 500;"></span>
+                                            </p>
+                                            <div class = "list-group" style="width: 400px">
+                                            {% for size in sizes %}
+                                                <span class = "size-span list-group-item" data-size="{{size}}" onClick="selectSize(this.dataset.size)">{{size}}</span>
+                                            {% endfor %}
+                                            </div>
+                                        {% endif %}
 
-                                        <div id="discount_quantity" style="font-size: 17px;font-weight: 1000;color: rgb(36, 36, 36);margin-bottom:10px;cursor: pointer;">
-                                            {{discounts|length}} Mã Giảm Giá 
-                                        </div>
 
+                                        {% if discounts|length > 0 %}
+                                            <div id="discount_quantity" style="font-size: 17px;font-weight: 1000;color: rgb(36, 36, 36);margin-bottom:10px;cursor: pointer;">
+                                                {{discounts|length}} Mã Giảm Giá 
+                                            </div>
+                                        {% endif %}
+                                        
                                         {% for discount in discounts %}
                                             <span class="coupon"
                                                  data-hsd="{{discount.discountid.hsd}}" 
@@ -123,7 +149,7 @@
                                         <div class="qty-input" style="margin-top: 20px">
                                             <span class="text-uppercase">Amount: </span>
                                             <input class="input" name="quantity" type="number" value="1" min="1" max="{{ product.amount }}">
-                                            <button type="submit" class="primary-btn add-to-cart">
+                                            <button type="submit" class="primary-btn add-to-cart" id="addToCart">
                                                 <i class="fa fa-shopping-cart"></i> Add to Cart
                                             </button>
                                         </div>
@@ -141,7 +167,7 @@
                     </div>
                     <div class="col-md-12">
                         <div class="product-tab">
-                            <ul class="tab-nav">
+                            <ul class="tab-nav" id = "mytabs">
                                 <li class="active"><a data-toggle="tab" href="#tab1">Details</a></li>
                                 <li><a data-toggle="tab" href="#tab2">Reviews</a></li>
                                 <li><a data-toggle="tab" href="#tab3">Comments</a></li>
@@ -416,6 +442,7 @@
         </div>
         <!-- Button trigger modal -->
     <script type="text/javascript">
+        /* ajax to change page review/comment  */
         $('#rv1').addClass("active");
         $('#cm1').addClass("active");
         function changePage(id){
@@ -503,6 +530,21 @@
     </script>
 
     <script type="text/javascript">
+        $('#addToCart').attr('disabled', true);
+        
+        /*  Change active item when select color and size  */
+        
+        $('.list-group-item').click(function(e) {
+            e.preventDefault();
+            $(this).addClass('active').siblings().removeClass('active');
+        });
+
+        /* change to tab review when click link  */
+        function toReview(){
+            $('#mytabs a[href="#tab2"]').tab('show');
+        }
+
+        /* show and hide reply box */
         function reply(id){
             $('.replybox').hide();
             $('#'+id).toggle();
@@ -511,17 +553,78 @@
             $('.replybox').hide();
         }
 
+        /* show all discount detail  */
         function DiscountDetail(hsd,requiree,value){
             
         }
 
+        /* Select size and color  */
         function selectSize(size){
             $('#size').text(size);
+            var color_size = {{ color_size| safe}};
+            if(color_size.length > 0){
+                if( $('#color').text() != ""){
+                    var selectedColorSize = $('#color').text().toLowerCase()+'-'+$('#size').text();
+                    for(var i=0; i<color_size.length;i++){
+                        item = color_size[i];
+                        if(item.tenvalue == selectedColorSize){
+                            $('#remain').text(item.soluongsanphamconlai +" sản phẩm");
+                            $('#price').text(item.gia.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")+" VND");
+                            $('#addToCart').attr('disabled', false);
+                            return;
+                        }
+                    }
+                    $('#price').text("0 VND");
+                    $('#remain').text("Sản phẩm này đã hết hàng !!");
+                }
+            }else{
+                var sizeAttribute = {{sizeAttribute |safe}}
+                for(var i=0; i<sizeAttribute.length;i++){
+                    item = sizeAttribute[i];
+                    if(item.tenvalue == size){
+                        $('#remain').text(item.soluongsanphamconlai +" sản phẩm");
+                        $('#price').text(item.gia.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")+" VND");
+                        $('#addToCart').attr('disabled', false);
+                        return;
+                    }
+                }
+            }
         }
+
         function selectColor(color){
-            console.log(color)
-            $('#color').text(color);
+            $('#color').text(color.toUpperCase());
+            var color_size = {{ color_size| safe}};
+            if(color_size.length >0){
+                if( $('#size').text() != ""){
+                    var selectedColorSize = $('#color').text().toLowerCase()+'-'+$('#size').text();
+                    for(var i=0; i<color_size.length;i++){
+                        item = color_size[i];
+                        if(item.tenvalue == selectedColorSize){
+                            $('#remain').text(item.soluongsanphamconlai +" sản phẩm");
+                            $('#price').text(item.gia.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")+" VND");
+                            $('#addToCart').attr('disabled', false);
+                            return;
+                        }
+                    }
+                    $('#price').text("0 VND");
+                    $('#remain').text("Sản phẩm này đã hết hàng !!");
+                }
+            }else{
+                var colorAttribute = {{colorAttribute |safe}}
+                for(var i=0; i<colorAttribute.length;i++){
+                    item = colorAttribute[i];
+                    if(item.tenvalue == color){
+                        $('#remain').text(item.soluongsanphamconlai +" sản phẩm");
+                        $('#price').text(item.gia.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")+" VND");
+                        $('#addToCart').attr('disabled', false);
+                        return;
+                    }
+                }
+            }
+
         }
+
+        /**/
     </script>
 
     <script type="text/javascript">

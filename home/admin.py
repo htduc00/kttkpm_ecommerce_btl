@@ -43,3 +43,7 @@ admin.site.register(Discount, DiscountAdmin)
 admin.site.register(ProductDiscount,ProductDiscountAdmin)
 admin.site.register(Attribute)
 admin.site.register(Attributevalue)
+
+admin.site.register(Theloaidientu)
+admin.site.register(Theloaiquanao)
+

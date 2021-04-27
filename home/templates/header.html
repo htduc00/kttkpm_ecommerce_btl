@@ -48,14 +48,14 @@
 
                 <!-- Search -->
                 <div class="header-search">
-                    <form action="/search/" method="post">
+                    <form action="/home/search/" method="post">
                         {% csrf_token %}
                         <input id="query" name="query" class="input search-input" type="text" placeholder="Enter your keyword">
-                        <select name="catid"  class="input search-categories">
+                        <select name="type" class="input search-categories">
                             <option value="0">All Categories</option>
-                            <option value="1">Sách</option>
-                            <option value="2">Điện tử</option>
-                            <option value="3">Áo quần</option>
+                            <option value="book">Sách</option>
+                            <option value="electro">Điện tử</option>
+                            <option value="clothes">Áo quần</option>
                         </select>
                         <button class="search-btn"><i class="fa fa-search"></i></button>
                     </form>

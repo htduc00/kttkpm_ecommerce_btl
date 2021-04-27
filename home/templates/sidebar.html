@@ -7,94 +7,13 @@
   <div class="container">
         <div id="responsive-nav">
       <!-- category nav -->
-            <div class="category-nav">
-                <span class="category-header">Categories<i class="fa fa-list"></i></span>                
-                <ul class="category-list" style="display:none;">
-                    <li class="dropdown side-dropdown">
-                        <a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">Sách<i class="fa fa-angle-right"></i></a>
-                        <div class="custom-menu">
-                            <ul class="list-links">
-                            <li>
-                                <a href="#">Văn học</a>
-                            </li>
-                            <li>
-                                <a href="#">Tâm lí - Kỹ năng sống</a>
-                            </li>
-                            <li>
-                                <a href="#">Nuôi dạy con</a>
-                            </li>
-                            <li>
-                                <a href="#">Ngoại ngữ</a>
-                            </li>
-                            <li>
-                                <a href="#">Phụ nữ</a>
-                            </li>
-                            <li>
-                                <a href="#">Kinh doanh - Kinh tế</a>
-                            </li>
-                            <li>
-                                <a href="#">Luật</a>
-                            </li>
-                            <li>
-                                <a href="#">Nấu ăn - Nuôi trồng</a>
-                            </li>
-                            <li>
-                                <a href="#">Y Học</a>
-                            </li>
-                            <li>
-                                <a href="#">Thiếu nhi</a>
-                            </li>
-                            <li>
-                                <a href="#">Sách Khoa Học</a>
-                            </li>
-                            <li>
-                                <a href="#">Lịch Sử - Địa Lí - Tôn Giáo</a>
-                            </li>
-                            </ul>
-                        </div>
-                    </li>
-                    
-                    <li class="dropdown side-dropdown">
-                        <a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">Điện tử<i class="fa fa-angle-right"></i></a>
-                        <div class="custom-menu">
-                            <ul class="list-links">
-                            <li>
-                                <a href="#">Điện Thoại - Máy Tính Bảng</a>
-                            </li>
-                            <li>
-                                <a href="#">Điện Tử - Điện Lạnh</a>
-                            </li>
-                            <li>
-                                <a href="#">Phụ Kiện - Thiết Bị Số</a>
-                            </li>
-                            <li>
-                                <a href="#">Laptop - Thiết Bị IT</a>
-                            </li>
-                            <li>
-                                <a href="#">Máy Ảnh - Quay Phim</a>
-                            </li>
-                            <li>
-                                <a href="#">Điện Gia Dụng</a>
-                            </li>
-                            </ul>
-                        </div>
-                    </li>
+            <div class="category-nav ">
+                <span class="category-header">Categories<i class="fa fa-list"></i></span>  
+                
+                {% load myapptags %}
+                {% categoryTree as category %}
 
-                    <li class="dropdown side-dropdown">
-                        <a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">Áo quần<i class="fa fa-angle-right"></i></a>
-                        <div class="custom-menu">
-                            <ul class="list-links">
-                            <li>
-                                <a href="#">Thời Trang Nam </a>
-                            </li>
-                            <li>
-                                <a href="#">Thời Trang Nữ </a>
-                            </li>
-                            </ul>
-                        </div>
-                    </li>
-                </ul>
-
+                {{ category | safe }}
             </div>
             <!-- /category nav -->
 

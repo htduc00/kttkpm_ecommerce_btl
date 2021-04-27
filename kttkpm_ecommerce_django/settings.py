@@ -91,6 +91,11 @@ DATABASES = {
         'PASSWORD':'',
         'HOST':'localhost',
         'PORT':3306
+        # 'NAME': 'kttkpm_ecommerce_django_db',
+        # 'USER':'alpha',
+        # 'PASSWORD':'1234567',
+        # 'HOST':'26.245.54.185',
+        # 'PORT':3306
     }
 }
 

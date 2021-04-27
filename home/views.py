@@ -1,5 +1,3 @@
-import json
-
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
@@ -8,21 +6,18 @@ from django.db.models import Avg, Count, Q, F
 from django.db.models.functions import Concat
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, request
 from django.shortcuts import render
+
 from .models import *
 from django import template
 from .forms import *
 from django.contrib import messages
-from django.http import HttpResponse, HttpResponseRedirect
 from datetime import date
-from django.http import JsonResponse
 from django.core.paginator import Paginator
 import json
 from json import JSONEncoder
 
-# Create your views here.
 from django.urls import reverse
-from home.forms import SearchForm
-from .models import Product
+# Create your views here.
 
 def index(request):
     products_picked = Product.objects.all().order_by('?')[:4]   #Random selected 4 products
@@ -90,18 +85,28 @@ def product_detail(request,id,slug):
     #     context.update({'sizes': sizes, 'colors': colors,
     #                     'variant': variant,'query': query
     #                     })
-
+    productAttributes = Attributevalue.objects.filter(productid=id)
     if productAttributes != None:
-        color_size = productAttributes.filter(attributeid__tenthuoctinh = "color-size")
         colors = []
         sizes = []
-        for item in color_size:
-            value = item.tenvalue.split("-")
-            if value[0] not in colors:
-                colors.append(value[0])
-            if value[1] not in sizes:
-                sizes.append(value[1])
-        context.update({'color_size':color_size, 'colors':colors, 'sizes':sizes })
+        color_size = productAttributes.filter(attributeid__tenthuoctinh = "color-size")
+        colorAttribute = productAttributes.filter(attributeid__tenthuoctinh = "color")
+        sizeAttribute = productAttributes.filter(attributeid__tenthuoctinh = "size")
+        if(color_size):
+            for item in color_size:
+                value = item.tenvalue.split("-")
+                if value[0] not in colors:
+                    colors.append(value[0])
+                if value[1] not in sizes:
+                    sizes.append(value[1])
+        else:
+                for item in colorAttribute:
+                    colors.append(item.tenvalue)
+                for item in sizeAttribute:
+                    sizes.append(item.tenvalue)
+        print(colors)
+        print(sizes)
+        context.update({'color_size':list(color_size.values()),'colorAttribute':list(colorAttribute.values()),'sizeAttribute':list(sizeAttribute.values()), 'colors':colors, 'sizes':sizes })
     if request.method == 'GET' and request.is_ajax() == False :
         return render(request,'product_detail.html',context)
     elif request.GET.get('type') == "rv":
@@ -169,3 +174,62 @@ def addcommentreply(request,id):
             data.save()
             messages.success(request, "Bình luận thành công")
             return HttpResponseRedirect(url)
+
+
+def category_products(request, type, theloai):
+    try:
+        if type == 'book':
+            products = Product.objects.raw(
+                'SELECT * '
+                'FROM product as p '
+                'LEFT JOIN sachtype s on p.id = s.ProductID '
+                'WHERE s.TheLoaiSachID = %s', [theloai])
+        elif type == 'electro':
+            products = Product.objects.raw(
+                'SELECT * '
+                'FROM product as p '
+                'LEFT JOIN dientutype d on p.id = d.ProductID '
+                'WHERE d.ChiTietTheLoaiDienTuID = %s', [theloai])
+        elif type == 'aoquan':
+            products = Product.objects.raw(
+                'SELECT * '
+                'FROM product as p '
+                'LEFT JOIN aoquan a on p.id = a.ProductID '
+                'WHERE a.TheLoaiQuanAoID = %s', [theloai])
+        else:
+            products = None
+    except:
+        pass
+    # try:
+    #     products = Product.objects.raw(
+    #         'SELECT p.id,p.price,p.amount,p.image,p.variant,l.title, l.keywords, l.description,l.slug,l.detail '
+    #         'FROM product_product as p '
+    #         'LEFT JOIN product_productlang as l '
+    #         'ON p.id = l.product_id '
+    #         'WHERE p.category_id=%s and l.lang=%s', [id])
+    # except:
+    #     pass
+
+    context={'products': products,
+            'productType': type }
+
+    return render(request,'category_products.html',context)
+
+
+def search(request):
+    if request.method == 'POST': # check post
+        form = SearchForm(request.POST)
+        if form.is_valid():
+            query = form.cleaned_data['query'] # get form input data
+            type = form.cleaned_data['type']
+            if type=='0':
+                products = Product.objects.filter(ten__icontains=query)  #SELECT * FROM product WHERE title LIKE '%query%'
+            else:
+                products = Product.objects.filter(ten__icontains=query,type=type)
+            # category = Category.objects.all()
+            context = {'products': products, 'query':query }
+                      #  'category': category }
+            
+            return render(request, 'search_products.html', context)
+
+    return HttpResponseRedirect('/')
