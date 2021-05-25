@@ -36,6 +36,10 @@ urlpatterns = [
     path('addreview/<int:id>', views.addreview, name='addreview'),
     path('addcomment/<int:id>', views.addcomment, name='addcomment'),
     path('addcommentreply/<int:id>', views.addcommentreply, name='addcommentreply'),
+    path('addtoshopcart', views.addtoshopcart, name='addtoshopcart'),
+    path('shopcart', views.shopcart, name='shopcart'),
+    path('deletefromcart/<int:id>',views.deletefromcart,name='deletefromcart'),
+     path('orderproduct',views.orderproduct,name='orderproduct')
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

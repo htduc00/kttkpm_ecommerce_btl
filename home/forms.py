@@ -15,3 +15,15 @@ class CommentForm(ModelForm):
     class Meta:
         model = Productcomment
         fields = ['noidung']
+
+
+class CartForm(ModelForm):
+    class Meta:
+        model = Cart
+        fields = ['soluong','variant_id']
+
+class OrderForm(ModelForm):
+    class Meta:
+        model = OrderFormm
+        fields = ['name','address','phone','city','dvvc']
+

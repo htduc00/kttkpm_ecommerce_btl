@@ -19,6 +19,19 @@ class ProductCommentReplyAdmin(admin.ModelAdmin):
 class ProductDiscountAdmin(admin.ModelAdmin):
     list_display = ['productid','discountid']
 
+
+class ProductAttributeAdmin(admin.ModelAdmin):
+	list_display = ['product_id','attribute_id']
+
+class AttributeAdmin(admin.ModelAdmin):
+	list_display = ['tenthuoctinh']
+
+class ProductVariantAdmin(admin.ModelAdmin):
+	list_display = ['variant_id','product_id','variant_name','price','quantity','image_tag']
+
+class VariantValueAdmin(admin.ModelAdmin):
+	list_display = ['product_id','variant_id','attribute_id','value']
+
 admin.site.register(Product)
 admin.site.register(Tacgia)
 admin.site.register(Nhaxuatban)
@@ -41,9 +54,14 @@ admin.site.register(Paymentmethod)
 admin.site.register(Donvivanchuyen)
 admin.site.register(Discount, DiscountAdmin)
 admin.site.register(ProductDiscount,ProductDiscountAdmin)
-admin.site.register(Attribute)
+admin.site.register(Attribute, AttributeAdmin)
 admin.site.register(Attributevalue)
 
 admin.site.register(Theloaidientu)
 admin.site.register(Theloaiquanao)
+
+
+admin.site.register(ProductAttribute, ProductAttributeAdmin)
+admin.site.register(ProductVariant,ProductVariantAdmin)
+admin.site.register(VariantValue,VariantValueAdmin)
 

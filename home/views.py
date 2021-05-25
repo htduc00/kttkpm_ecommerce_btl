@@ -6,6 +6,7 @@ from django.db.models import Avg, Count, Q, F
 from django.db.models.functions import Concat
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, request
 from django.shortcuts import render
+from datetime import date
 
 from .models import *
 from django import template
@@ -80,33 +81,60 @@ def product_detail(request,id,slug):
     #     else:
     #         variants = Variants.objects.filter(product_id=id)
     #         colors = Variants.objects.filter(product_id=id,size_id=variants[0].size_id )
-    #         sizes = Variants.objects.raw('SELECT * FROM  product_variants  WHERE product_id=%s GROUP BY size_id',[id])
+    #         sizes = Variants.objects.raw('SEL2ECT * FROM  product_variants  WHERE product_id=%s GROUP BY size_id',[id])
     #         variant =Variants.objects.get(id=variants[0].id)
     #     context.update({'sizes': sizes, 'colors': colors,
     #                     'variant': variant,'query': query
     #                     })
-    productAttributes = Attributevalue.objects.filter(productid=id)
+
+    #-------------------------------------------------------------------
+    #--------------------------------------------------------------------------
+    # productAttributes = Attributevalue.objects.filter(productid=id)
+    # if productAttributes != None:
+    #     colors = []
+    #     sizes = []
+    #     color_size = productAttributes.filter(attributeid__tenthuoctinh = "color-size")
+    #     colorAttribute = productAttributes.filter(attributeid__tenthuoctinh = "color")
+    #     sizeAttribute = productAttributes.filter(attributeid__tenthuoctinh = "size")
+    #     if(color_size):
+    #         for item in color_size:
+    #             value = item.tenvalue.split("-")
+    #             if value[0] not in colors:
+    #                 colors.append(value[0])
+    #             if value[1] not in sizes:
+    #                 sizes.append(value[1])
+    #     else:
+    #             for item in colorAttribute:
+    #                 colors.append(item.tenvalue)
+    #             for item in sizeAttribute:
+    #                 sizes.append(item.tenvalue)
+    #     context.update({'color_size':list(color_size.values()),'colorAttribute':list(colorAttribute.values()),'sizeAttribute':list(sizeAttribute.values()), 'colors':colors, 'sizes':sizes })
+    #-----------------------------------------------------------------------------------------------------------------------------
+    
+    variants = ProductVariant.objects.filter(product_id=id)
+    productAttributes = ProductAttribute.objects.filter(product_id = id)
+    variantValues = VariantValue.objects.filter(product_id__product_id = id)
+    colors = []
+    sizes = []
     if productAttributes != None:
-        colors = []
-        sizes = []
-        color_size = productAttributes.filter(attributeid__tenthuoctinh = "color-size")
-        colorAttribute = productAttributes.filter(attributeid__tenthuoctinh = "color")
-        sizeAttribute = productAttributes.filter(attributeid__tenthuoctinh = "size")
-        if(color_size):
-            for item in color_size:
-                value = item.tenvalue.split("-")
-                if value[0] not in colors:
-                    colors.append(value[0])
-                if value[1] not in sizes:
-                    sizes.append(value[1])
-        else:
-                for item in colorAttribute:
-                    colors.append(item.tenvalue)
-                for item in sizeAttribute:
-                    sizes.append(item.tenvalue)
-        print(colors)
-        print(sizes)
-        context.update({'color_size':list(color_size.values()),'colorAttribute':list(colorAttribute.values()),'sizeAttribute':list(sizeAttribute.values()), 'colors':colors, 'sizes':sizes })
+        for attribute in productAttributes:
+            attributeValues =  VariantValue.objects.filter(product_id__product_id = id, attribute_id = attribute)
+            if attribute.attribute_id.tenthuoctinh == "color":
+                for itemvalue in attributeValues:
+                    if itemvalue.value not in colors:
+                        colors.append(itemvalue.value)
+            else:
+               for itemvalue in attributeValues:
+                    if itemvalue.value not in sizes:
+                        sizes.append(itemvalue.value)      
+
+    context.update({'variantValues': list(variantValues.values()), 'productAttributes': list(productAttributes.values()), 'colors': colors, 'sizes': sizes, 'variants': list(variants.values())})
+
+
+
+ 
+
+
     if request.method == 'GET' and request.is_ajax() == False :
         return render(request,'product_detail.html',context)
     elif request.GET.get('type') == "rv":
@@ -233,3 +261,133 @@ def search(request):
             return render(request, 'search_products.html', context)
 
     return HttpResponseRedirect('/')
+
+
+
+
+# ORDER
+#------------------------------------------------------------------------------------------
+@login_required(login_url='/login') # Check login
+def addtoshopcart(request):
+    url = request.META.get('HTTP_REFERER')
+    current_user = request.user
+    if request.method == 'POST':
+        form = CartForm(request.POST)
+        if form.is_valid():
+            variantid = form.cleaned_data['variant_id']
+            checkinvariant = Cart.objects.filter(variant_id=variantid, taikhoanid__id=current_user.id)  # Check product in shopcart
+            if checkinvariant:
+                control = 1 # The product is in the cart
+            else:
+                control = 0 # The product is not in the cart"""
+
+
+            if control==1: # Update  shopcart
+                data = Cart.objects.get(variant_id=variantid, taikhoanid__id=current_user.id)
+                data.soluong += form.cleaned_data['soluong']
+                data.save()  # save data
+            else : # Inser to Shopcart
+                data = Cart()
+                data.taikhoanid = current_user
+                data.variant_id = variantid
+                data.soluong = form.cleaned_data['soluong']
+                data.save()
+        messages.success(request, "Product added to Shopcart ")
+        return HttpResponseRedirect(url)
+
+    # else: # if there is no post
+    #     if control == 1:  # Update  shopcart
+    #         data = ShopCart.objects.get(product_id=id, user_id=current_user.id)
+    #         data.quantity += 1
+    #         data.save()  #
+    #     else:  #  Inser to Shopcart
+    #         data = ShopCart()  # model ile bağlantı kur
+    #         data.user_id = current_user.id
+    #         data.product_id = id
+    #         data.quantity = 1
+    #         data.variant_id =None
+    #         data.save()  #
+    #     messages.success(request, "Product added to Shopcart")
+    #     return HttpResponseRedirect(url)
+
+
+def shopcart(request):
+    current_user = request.user  # Access User Session information
+    cart = Cart.objects.filter(taikhoanid__id=current_user.id)
+    cartTotal=0
+    for rs in cart:
+        cartTotal += rs.total
+    context={'cart': cart,
+             'total': cartTotal}
+    return render(request,'cart.html',context)
+
+@login_required(login_url='/login') # Check login
+def deletefromcart(request,id):
+    Cart.objects.filter(variant_id=id).delete()
+    messages.success(request, "Your item deleted form Shopcart.")
+    return HttpResponseRedirect("/shopcart")
+
+
+def orderproduct(request):
+    current_user = request.user
+    cart = Cart.objects.filter(taikhoanid=current_user)
+    cartTotal = 0
+    for rs in cart:
+        cartTotal += rs.total
+
+    if request.method == 'POST':  # if there is a post
+        form = OrderForm(request.POST)
+        #return HttpResponse(request.POST.items())
+        if form.is_valid():
+            # Send Credit card to bank,  If the bank responds ok, continue, if not, show the error
+            # ..............
+
+            shipment = Shipment()
+            shipment.donvivanchuyenid = Donvivanchuyen.objects.get(id = int(form.cleaned_data['dvvc']))
+            shipment.giaship = 0
+            shipment.address = form.cleaned_data['name']+","+form.cleaned_data['address'] + "," +form.cleaned_data['city']+","+form.cleaned_data['phone']
+            shipment.save()
+
+            payment = Payment()
+            payment.paymentmethodid = Paymentmethod.objects.get(id=1)
+            payment.save()
+
+
+            order = Order()
+            order.taikhoanid = current_user
+            order.tongtien = cartTotal
+            order.status = "new"
+            order.createat = date.today()
+            order.shipmentid = shipment
+            order.paymentid = payment
+            order.save()
+
+            for rs in cart:
+                detail = Orderdetail()
+                detail.orderid     = order
+                detail.variantid   = rs.variant_id
+                detail.productid = rs.variant_id.product_id
+                detail.soluong     = rs.soluong
+                detail.gia = rs.total
+                detail.save()
+
+                variant = ProductVariant.objects.get(variant_id=rs.variant_id.variant_id)
+                variant.quantity -= rs.soluong
+                variant.save()
+
+            Cart.objects.filter(taikhoanid = current_user).delete() # Clear & Delete shopcart
+            request.session['cart_items'] = 0
+            messages.success(request, "Your Order has been completed. Thank you ")
+            return render(request, 'Order_Completed.html')
+        else:
+            messages.warning(request, form.errors)
+            return HttpResponseRedirect("/orderproduct")
+
+    form= OrderForm()
+    profile = UserProfile.objects.get(user = current_user)
+    context = {'cart': cart,
+               'total': cartTotal,
+               'form': form,
+               'profile': profile,
+               }
+    return render(request, 'order_form.html', context)

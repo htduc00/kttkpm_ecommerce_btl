@@ -10,9 +10,10 @@ from ckeditor.fields import RichTextField
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.db.models import Avg, Count
 from django.contrib.auth.models import User
-
 from django.utils.safestring import mark_safe
 import json
+
+
 
 class Aoquan(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True)  # Field name made lowercase.
@@ -42,6 +43,8 @@ class Attribute(models.Model):
         managed = False
         db_table = 'attribute'
 
+    def __str__(self):
+        return self.tenthuoctinh
 
 class Attributevalue(models.Model):
     id = models.CharField(db_column='ID', primary_key=True, max_length=255)  # Field name made lowercase.
@@ -55,13 +58,22 @@ class Attributevalue(models.Model):
         managed = False
         db_table = 'attributevalue'
 
-
 class Cart(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True)  # Field name made lowercase.
-    taikhoanid = models.ForeignKey('Taikhoan', models.DO_NOTHING, db_column='TaiKhoanID')  # Field name made lowercase.
-    productid = models.ForeignKey('Product', models.DO_NOTHING, db_column='ProductID')  # Field name made lowercase.
-    soluong = models.IntegerField(db_column='SoLuong')  # Field name made lowercase.
-    sotien = models.FloatField(db_column='SoTien')  # Field name made lowercase.
+    taikhoanid = models.ForeignKey(User, models.DO_NOTHING, db_column='TaiKhoanID')  # Field name made lowercase.
+    variant_id = models.ForeignKey('ProductVariant', models.DO_NOTHING, db_column='variant_id')  # Field name made lowercase.
+    soluong = models.IntegerField(db_column='SoLuong')
+    
+    def __str__(self):
+        return self.variant_id.name
+
+    @property
+    def price(self):
+        return (self.variant_id.price)
+
+    @property
+    def total(self):
+        return (self.variant_id.price * self.soluong)
 
     class Meta:
         managed = False
@@ -308,7 +320,8 @@ class Order(models.Model):
 
 class Orderdetail(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True)  # Field name made lowercase.
-    productid = models.ForeignKey('Product', models.DO_NOTHING, db_column='ProductID')  # Field name made lowercase.
+    productid = models.ForeignKey('Product', models.DO_NOTHING, db_column='product_id')
+    variantid = models.ForeignKey('ProductVariant', models.DO_NOTHING, db_column='variant_id')  # Field name made lowercase.
     orderid = models.ForeignKey(Order, models.DO_NOTHING, db_column='OrderID')  # Field name made lowercase.
     soluong = models.IntegerField(db_column='SoLuong')  # Field name made lowercase.
     gia = models.FloatField(db_column='Gia')  # Field name made lowercase.
@@ -538,8 +551,10 @@ class Sanphamyeuthich(models.Model):
 
 class Shipment(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True)  # Field name made lowercase.
+    address = models.CharField(db_column='address', max_length=255)
     donvivanchuyenid = models.ForeignKey(Donvivanchuyen, models.DO_NOTHING, db_column='DonViVanChuyenID')  # Field name made lowercase.
     giaship = models.FloatField(db_column='GiaShip')  # Field name made lowercase.
+
 
     class Meta:
         managed = False
@@ -661,7 +676,7 @@ class Thethanhvien(models.Model):
 
 class Thongtingiaohang(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True)  # Field name made lowercase.
-    khachhangid = models.ForeignKey(Khachhang, models.DO_NOTHING, db_column='KhachHangID')  # Field name made lowercase.
+    khachhangid = models.ForeignKey(User, models.DO_NOTHING, db_column='KhachHangID')  # Field name made lowercase.
     hoten = models.CharField(db_column='HoTen', max_length=255, blank=True, null=True)  # Field name made lowercase.
     diachi = models.CharField(db_column='DiaChi', max_length=255, blank=True, null=True)  # Field name made lowercase.
     sodt = models.CharField(db_column='SoDT', max_length=255, blank=True, null=True)  # Field name made lowercase.
@@ -692,3 +707,52 @@ class Thuonghieuquanao(models.Model):
     class Meta:
         managed = False
         db_table = 'thuonghieuquanao'
+
+
+class ProductAttribute(models.Model):
+    id=models.AutoField(db_column='id',primary_key=True)
+    product_id = models.ForeignKey(Product, models.DO_NOTHING, db_column='product_id')
+    attribute_id = models.ForeignKey(Attribute, models.DO_NOTHING, db_column='attribute_id')
+
+    class Meta:
+        managed = False
+        db_table = 'product_attribute'
+
+    def __str__(self):
+        return self.product_id.ten +"-"+self.attribute_id.tenthuoctinh
+
+class ProductVariant(models.Model):
+    variant_id = models.CharField(db_column='variant_id',primary_key=True,max_length=255)
+    product_id = models.ForeignKey(Product, models.DO_NOTHING, db_column='product_id')
+    variant_name = models.CharField(db_column='variant_name',max_length=255,blank=True,null=True)
+    price = models.FloatField(db_column='price')
+    quantity = models.IntegerField(db_column='quantity')
+    image = models.ImageField(db_column='image', blank=True, null=True)
+
+    def image_tag(self):
+        return mark_safe('<img src="{}" height="50"/>'.format(self.image.url))
+    image_tag.short_description = 'Image'
+    def __str__(self):
+        return self.product_id.ten +"-"+self.variant_name
+    class Meta:
+        managed = False
+        db_table = 'product_variant'
+
+class VariantValue(models.Model):
+    id=models.AutoField(db_column='id',primary_key=True)
+    product_id = models.ForeignKey(ProductVariant, models.DO_NOTHING, db_column='product_id', related_name='products')
+    variant_id = models.ForeignKey(ProductVariant, models.DO_NOTHING, db_column='variant_id',related_name='variants')
+    attribute_id = models.ForeignKey(ProductAttribute, models.DO_NOTHING, db_column='attribute_id')
+    value = models.CharField(db_column='value', max_length=255,blank=True,null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'variant_value'
+
+
+class OrderFormm(models.Model):
+    name = models.CharField(max_length = 255,blank=True, null=True)
+    address = models.CharField(max_length = 255,blank=True, null=True)
+    phone = models.CharField(max_length = 255,blank=True, null=True)
+    city = models.CharField(max_length = 255,blank=True, null=True)
+    dvvc = models.IntegerField(blank=True, null=True)

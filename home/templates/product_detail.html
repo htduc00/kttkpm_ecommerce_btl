@@ -16,7 +16,7 @@
                 <li><a href="/">Home</a></li>
                 <!--<li><a href="/category/{{ product.category.id }}/{{ product.category.slug }}">{{ product.category.title }}</a></li>
                 -->
-                <li><a href="/category/{{ product.type }}">{{ product.type }}</a></li>
+                <li><a href="/home/category/{{ product.type }}">{{ product.type }}</a></li>
                 <li class="active">{{ product.ten }}</li>
             </ul>
         </div>
@@ -79,12 +79,12 @@
                             {% if product.type == "Book" %}
                             <p><strong>Tác giả:</strong> <a href="#" style = "color: blue">Keigo</a> </p>
                             {% else %}
-                            <p><strong>Thương hiệu:</strong> <a href="#" style = "color: blue">Samsung</a> </p>
+                            <p><strong>Thương hiệu:</strong> <a href="#" style = "color: blue">ABCXYZ</a> </p>
                             {% endif %}
                             <p>{{ product.mota | safe }}</p>
                             
                             <div class="product-btns">
-                                <form action="/order/addtoshopcart/{{ product.id }}" method="post"  id="post-form">
+                                <form action="/addtoshopcart" method="post"  id="post-form">
                                     {% csrf_token %}
                                     <div id="SelectedProduct">
                                         <p>
@@ -92,7 +92,7 @@
                                             <span id ="remain" style="color: red"></span> 
                                         </p>
                                         <h3 class="product-price" id="price" >{{product.gia}} VND</h3>
-                                        {% if color_size %}
+                                        {% if colors %}
                                             <p style="color:gray; font-size: 12pt;font-family: Arial">
                                                 Chọn màu: 
                                                 <span id = "color" style="color: rgb(36, 36, 36);font-weight: 500;"></span>
@@ -100,24 +100,8 @@
                                             {% for cl in colors %}
                                             <span class = "color-span" style="background-color:{{cl}};" data-color="{{cl}}" onClick="selectColor(this.dataset.color)" ></span>
                                             {% endfor %}
-                                            <p style="color:gray; font-size: 12pt;font-family: Arial">
-                                                Chọn size: 
-                                                <span id = "size" style="color: rgb(36, 36, 36);font-weight: 500;"></span>
-                                            </p>
-                                            <div class = "list-group" style="width: 400px">
-                                            {% for size in sizes %}
-                                                <span class = "size-span list-group-item" data-size="{{size}}" onClick="selectSize(this.dataset.size)">{{size}}</span>
-                                            {% endfor %}
-                                            </div>
-                                        {% elif colorAttribute %}
-                                            <p style="color:gray; font-size: 12pt;font-family: Arial">
-                                                Chọn màu: 
-                                                <span id = "color" style="color: rgb(36, 36, 36);font-weight: 500;"></span>
-                                            </p>
-                                            {% for cl in colors %}
-                                            <span class = "color-span" style="background-color:{{cl}};" data-color="{{cl}}" onClick="selectColor(this.dataset.color)" ></span>
-                                            {% endfor %}
-                                        {% elif sizeAttribute %}
+                                        {% endif %}
+                                        {% if sizes %}
                                             <p style="color:gray; font-size: 12pt;font-family: Arial">
                                                 Chọn size: 
                                                 <span id = "size" style="color: rgb(36, 36, 36);font-weight: 500;"></span>
@@ -135,7 +119,6 @@
                                                 {{discounts|length}} Mã Giảm Giá 
                                             </div>
                                         {% endif %}
-                                        
                                         {% for discount in discounts %}
                                             <span class="coupon"
                                                  data-hsd="{{discount.discountid.hsd}}" 
@@ -148,7 +131,8 @@
                                         <br>
                                         <div class="qty-input" style="margin-top: 20px">
                                             <span class="text-uppercase">Amount: </span>
-                                            <input class="input" name="quantity" type="number" value="1" min="1" max="{{ product.amount }}">
+                                            <input class="input" name="soluong" type="number" value="1" min="1" max="{{ product.amount }}">
+                                            <input class="input" name="variant_id" id = "variantId" type="hidden">
                                             <button type="submit" class="primary-btn add-to-cart" id="addToCart">
                                                 <i class="fa fa-shopping-cart"></i> Add to Cart
                                             </button>
@@ -530,7 +514,15 @@
     </script>
 
     <script type="text/javascript">
+        var productAttribute1 = {{productAttributes|safe}};
+        var variant1 = {{variants|safe}}
         $('#addToCart').attr('disabled', true);
+        if(productAttribute1.length == 0){
+            $('#remain').text(variant1[0].quantity +" sản phẩm");
+            $('#price').text(variant1[0].price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")+" VND");
+            $('#variantId').val(variant1[0].variant_id);
+            $('#addToCart').attr('disabled', false);
+        }
         
         /*  Change active item when select color and size  */
         
@@ -552,74 +544,109 @@
         function cancelreply(){
             $('.replybox').hide();
         }
-
-        /* show all discount detail  */
-        function DiscountDetail(hsd,requiree,value){
-            
-        }
-
         /* Select size and color  */
         function selectSize(size){
             $('#size').text(size);
-            var color_size = {{ color_size| safe}};
-            if(color_size.length > 0){
-                if( $('#color').text() != ""){
-                    var selectedColorSize = $('#color').text().toLowerCase()+'-'+$('#size').text();
-                    for(var i=0; i<color_size.length;i++){
-                        item = color_size[i];
-                        if(item.tenvalue == selectedColorSize){
-                            $('#remain').text(item.soluongsanphamconlai +" sản phẩm");
-                            $('#price').text(item.gia.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")+" VND");
+            var variants = {{ variants|safe }};
+            var variantValues = {{variantValues|safe}};
+            var productAttribute = {{productAttributes|safe}};
+            if (productAttribute.length > 1){
+                if( $('#color').text() == ""){
+                    $('#price').text("Chưa chọn color");
+                    $('#remain').text("Chưa chọn color");
+                }else if( $('#color').text() != ""){
+                    var selectedColor = $('#color').text();
+                    for(var i = 0; i< variants.length; i++){
+                        item1 = variants[i];
+                        var count = 0;
+                        for(var j = 0; j < variantValues.length; j++){
+                            item2 = variantValues[j];
+                            if(item2.variant_id_id == item1.variant_id && (item2.value == size||item2.value == selectedColor))
+                                count++;
+                        }
+                        if(count == 2){
+                            $('#remain').text(item1.quantity +" sản phẩm");
+                            $('#price').text(item1.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")+" VND");
                             $('#addToCart').attr('disabled', false);
+                            $('#variantId').val(item1.variant_id);
                             return;
                         }
                     }
                     $('#price').text("0 VND");
                     $('#remain').text("Sản phẩm này đã hết hàng !!");
+                    $('#addToCart').attr('disabled', true);
                 }
-            }else{
-                var sizeAttribute = {{sizeAttribute |safe}}
-                for(var i=0; i<sizeAttribute.length;i++){
-                    item = sizeAttribute[i];
-                    if(item.tenvalue == size){
-                        $('#remain').text(item.soluongsanphamconlai +" sản phẩm");
-                        $('#price').text(item.gia.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")+" VND");
-                        $('#addToCart').attr('disabled', false);
-                        return;
+            }else if (productAttribute.length == 1){
+                for( i = 0; i< variantValues.length; i++){
+                    item = variantValues[i];
+                    if(item.value == color){
+                        for( j = 0; j<variants.length; j++){
+                            if(variants[j].variant_id == item.variant_id_id){
+                                $('#remain').text(variants[j].quantity +" sản phẩm");
+                                $('#price').text(variants[j].price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")+" VND");
+                                $('#addToCart').attr('disabled', false);
+                                $('variantId').val(variants[j].variant_id);
+                                break;
+                            }
+                        }
+                        break;
                     }
                 }
             }
         }
 
         function selectColor(color){
-            $('#color').text(color.toUpperCase());
-            var color_size = {{ color_size| safe}};
-            if(color_size.length >0){
-                if( $('#size').text() != ""){
-                    var selectedColorSize = $('#color').text().toLowerCase()+'-'+$('#size').text();
-                    for(var i=0; i<color_size.length;i++){
-                        item = color_size[i];
-                        if(item.tenvalue == selectedColorSize){
-                            $('#remain').text(item.soluongsanphamconlai +" sản phẩm");
-                            $('#price').text(item.gia.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")+" VND");
+            $('#color').text(color);
+            var variants = {{ variants|safe }};
+            var variantValues = {{variantValues|safe}};
+            var productAttribute = {{productAttributes|safe}};
+            if (productAttribute.length > 1){
+                if( $('#size').text() == ""){
+                    $('#price').text("Chưa chọn size");
+                    $('#remain').text("Chưa chọn size");
+                }else if( $('#size').text() != ""){
+                    var selectedSize = $('#size').text();
+                    for(var i = 0; i< variants.length; i++){
+                        item1 = variants[i];
+                        var count = 0;
+                        for(var j = 0; j < variantValues.length; j++){
+                            item2 = variantValues[j];
+                            if(item2.variant_id_id == item1.variant_id && (item2.value == color||item2.value == selectedSize))
+                                count++;
+                        }
+                        if(count == 2){
+                            $('#remain').text(item1.quantity +" sản phẩm");
+                            $('#price').text(item1.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")+" VND");
                             $('#addToCart').attr('disabled', false);
+                            $('#variantId').val(item1.variant_id);
                             return;
                         }
                     }
                     $('#price').text("0 VND");
                     $('#remain').text("Sản phẩm này đã hết hàng !!");
+                    $('#addToCart').attr('disabled', true);
                 }
-            }else{
-                var colorAttribute = {{colorAttribute |safe}}
-                for(var i=0; i<colorAttribute.length;i++){
-                    item = colorAttribute[i];
-                    if(item.tenvalue == color){
-                        $('#remain').text(item.soluongsanphamconlai +" sản phẩm");
-                        $('#price').text(item.gia.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")+" VND");
-                        $('#addToCart').attr('disabled', false);
-                        return;
+            }else if (productAttribute.length == 1){
+                for( i = 0; i< variantValues.length; i++){
+                    item = variantValues[i];
+                    if(item.value == color){
+                        for( j = 0; j<variants.length; j++){
+                            if(variants[j].variant_id == item.variant_id_id){
+                                $('#remain').text(variants[j].quantity +" sản phẩm");
+                                $('#price').text(variants[j].price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")+" VND");
+                                $('#addToCart').attr('disabled', false);
+                                $('variantId').val(variants[j].variant_id);
+                                break;
+                            }
+                        }
+                        break;
                     }
                 }
+            }else{
+                $('#remain').text(variants[0].quantity +" sản phẩm");
+                $('#price').text(variants[0].price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")+" VND");
+                $('#addToCart').attr('disabled', false);
+                $('variantId').val(variants[0].variant_id);
             }
 
         }
