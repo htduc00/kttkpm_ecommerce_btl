@@ -41,8 +41,6 @@
                                     <img src="{{ image.urlimage.url }}" alt="" style="height: 400px">
                                 </div>
                             {% endfor %}
-
-
                         </div>
                         <div id="product-view">
                             <div class="product-view">
@@ -71,9 +69,6 @@
                                     <i class="fa fa-star{% if product.avaregereview < 5%}-o empty{% endif%}"></i>
                                     {{ product.avaregereview |stringformat:".2f"}}
                                 </div>
-
-
-
                                 <a onclick="toReview()" href="#tab2"> {{ product.countreview}}  Review(s) / Add Review</a>
                             </div>
                             {% if product.type == "Book" %}
@@ -152,9 +147,9 @@
                     <div class="col-md-12">
                         <div class="product-tab">
                             <ul class="tab-nav" id = "mytabs">
-                                <li class="active"><a data-toggle="tab" href="#tab1">Details</a></li>
-                                <li><a data-toggle="tab" href="#tab2">Reviews</a></li>
-                                <li><a data-toggle="tab" href="#tab3">Comments</a></li>
+                                <li class="active"><a data-toggle="tab" href="#tab1">CHI TIẾT SẢN PHẨM</a></li>
+                                <li><a data-toggle="tab" href="#tab2">ĐÁNH GIÁ</a></li>
+                                <li><a data-toggle="tab" href="#tab3">HỎI ĐÁP</a></li>
                             </ul>
 
                             <!-- Detail -->
@@ -271,8 +266,7 @@
                                                 <div class="comment-head">
                                                   <h6 class="comment-name"><a href="#">{{ comment.user_profile.hovaten }}</a></h6>
                                                   <span>{{ comment.createdat }}</span>
-                                                  <i data-replybox="panel{{comment.id}}" class="fa fa-reply" onClick="reply(this.dataset.replybox)"></i>
-                                                  <i class="fa fa-heart"></i>
+                                                  <i data-replybox="panel{{comment.id}}" class="fa fa-reply" onClick="reply(this.dataset.replybox)">&nbsp;Trả lời</i>
                                                 </div>
                                                 <div class="comment-content">
                                                   {{ comment.noidung }}
@@ -309,8 +303,7 @@
                                                   <div class="comment-head">
                                                     <h6 class="comment-name"><a href="#">{{reply.user_profile.hovaten}}</a></h6>
                                                     <span>{{reply.createdat}}</span>
-                                                    <i data-replybox="panelrep{{comment.id}}" class="fa fa-reply" onClick="reply(this.dataset.replybox)"></i>
-                                                    <i class="fa fa-heart"></i>
+                                                    <i data-replybox="panelrep{{comment.id}}" class="fa fa-reply" onClick="reply(this.dataset.replybox)">&nbsp;Trả lời</i>
                                                   </div>
                                                   <div class="comment-content">
                                                     {{reply.noidung}}
