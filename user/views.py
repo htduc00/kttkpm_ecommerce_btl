@@ -25,11 +25,13 @@ def login_form(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            current_user =request.user
-            userprofile=UserProfile.objects.get(user_id=current_user.id)
+            current_user = request.user
+            userprofile = UserProfile.objects.get(user_id=current_user.id)
 
             try:
                 request.session['userimage'] = userprofile.image.url
+                request.session['role'] = userprofile.role.rolename
+                print(userprofile.role.rolename)
             except:
                 request.session['userimage'] = ''
             # Redirect to a success page.

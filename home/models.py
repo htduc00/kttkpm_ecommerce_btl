@@ -11,6 +11,7 @@ from ckeditor_uploader.fields import RichTextUploadingField
 from django.db.models import Avg, Count
 from django.contrib.auth.models import User
 from django.utils.safestring import mark_safe
+from django.contrib import admin
 import json
 
 
@@ -304,18 +305,65 @@ class Notification(models.Model):
         db_table = 'notification'
 
 
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, db_column="user_id")
+
+    hovaten = models.CharField(db_column='HoVaTen', max_length=255, blank=True, null=True)  # Field name made lowercase.
+    	
+    ngaysinh = models.DateField(db_column='NgaySinh', blank=True, null=True)  # Field name made lowercase.
+    GENDER_CHOICES = (
+        ('','----'),
+        ('Nam', 'Nam'),
+        ('Nữ', 'Nữ'),
+    )
+
+    gioitinh = models.CharField(db_column='GioiTinh',max_length=10, choices=GENDER_CHOICES)  # Field name made lowercase.
+    diachi = models.CharField(db_column='DiaChi', max_length=255, blank=True, null=True)  # Field name made lowercase.
+    sodt = models.CharField(db_column='SoDT', max_length=255, blank=True, null=True)  # Field name made lowercase.
+    thethanhvien = models.ForeignKey('Thethanhvien', models.DO_NOTHING)  # Field name made lowercase.
+    role = models.ForeignKey('Role', models.DO_NOTHING)  # Field name made lowercase.
+    image = models.ImageField(db_column='image', blank=True, null=True)  # Field name made lowercase.
+
+    username = None
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
+    def __str__(self):
+        return self.user.username
+
+    def image_tag(self):
+        return mark_safe('<img src="{}" height="50"/>'.format(self.image.url))
+    image_tag.short_description = 'Image'
+    class Meta:
+        managed = False
+        db_table = 'home_userprofile'
+
+
+
 class Order(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True)  # Field name made lowercase.
-    taikhoanid = models.ForeignKey(User, models.DO_NOTHING, db_column='TaiKhoanID')  # Field name made lowercase.
+    taikhoanid = models.ForeignKey(User, models.DO_NOTHING, db_column='TaiKhoanID', related_name="khachhang")  # Field name made lowercase.
+    nhanvienxuatid = models.ForeignKey(User, models.DO_NOTHING, db_column='NhanVienXuatID', related_name="nhanvienxuat", null=True)
     tongtien = models.FloatField(db_column='TongTien')  # Field name made lowercase.
     status = models.CharField(db_column='Status', max_length=255, blank=True, null=True)  # Field name made lowercase.
-    createdat = models.DateField(db_column='CreatedAt', blank=True, null=True)  # Field name made lowercase.
+    createdat = models.DateTimeField(db_column='CreatedAt', blank=True, null=True, auto_now_add=True)  # Field name made lowercase.
+    updateat = models.DateTimeField(db_column='UpdateAt', blank=True, null=True, auto_now_add=True)
     shipmentid = models.OneToOneField('Shipment', models.DO_NOTHING, db_column='ShipmentID')  # Field name made lowercase.
     paymentid = models.OneToOneField('Payment', models.DO_NOTHING, db_column='PaymentID')  # Field name made lowercase.
 
     class Meta:
         managed = False
         db_table = 'order'
+
+    def phuongthucthanhtoan(self):
+        return self.paymentid.paymentmethodid.tenpthuc
+    
+    def phuongthucvanchuyen(self):
+        return self.shipmentid.donvivanchuyenid.tendonvivanchuyen
+    
+    def nhanvienxuat(self):
+        if self.nhanvienxuat != None:
+            return self.nhanvienxuatid
 
 
 class Orderdetail(models.Model):
@@ -342,6 +390,9 @@ class Payment(models.Model):
     class Meta:
         managed = False
         db_table = 'payment'
+    
+    def phuongthucthanhtoan(self):
+        return self.paymentmethodid.tenpthuc
 
 
 class Paymentmethod(models.Model):
@@ -588,39 +639,6 @@ class Taikhoan(models.Model):
         managed = False
         db_table = 'taikhoan'
 
-class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, db_column="user_id")
-
-    hovaten = models.CharField(db_column='HoVaTen', max_length=255, blank=True, null=True)  # Field name made lowercase.
-    	
-    ngaysinh = models.DateField(db_column='NgaySinh', blank=True, null=True)  # Field name made lowercase.
-    GENDER_CHOICES = (
-        ('','----'),
-        ('Nam', 'Nam'),
-        ('Nữ', 'Nữ'),
-    )
-
-    gioitinh = models.CharField(db_column='GioiTinh',max_length=10, choices=GENDER_CHOICES)  # Field name made lowercase.
-    diachi = models.CharField(db_column='DiaChi', max_length=255, blank=True, null=True)  # Field name made lowercase.
-    sodt = models.CharField(db_column='SoDT', max_length=255, blank=True, null=True)  # Field name made lowercase.
-    thethanhvien = models.ForeignKey('Thethanhvien', models.DO_NOTHING)  # Field name made lowercase.
-    role = models.ForeignKey('Role', models.DO_NOTHING)  # Field name made lowercase.
-    image = models.ImageField(db_column='image', blank=True, null=True)  # Field name made lowercase.
-
-    username = None
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
-
-    def __str__(self):
-        return self.user.username
-
-    def image_tag(self):
-        return mark_safe('<img src="{}" height="50"/>'.format(self.image.url))
-    image_tag.short_description = 'Image'
-    class Meta:
-        managed = False
-        db_table = 'home_userprofile'
-
 
 class Thanhpho(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True)  # Field name made lowercase.
@@ -680,7 +698,7 @@ class Thongtingiaohang(models.Model):
     hoten = models.CharField(db_column='HoTen', max_length=255, blank=True, null=True)  # Field name made lowercase.
     diachi = models.CharField(db_column='DiaChi', max_length=255, blank=True, null=True)  # Field name made lowercase.
     sodt = models.CharField(db_column='SoDT', max_length=255, blank=True, null=True)  # Field name made lowercase.
-    macdinh = models.TextField(db_column='MacDinh')  # Field name made lowercase. This field type is a guess.
+    macdinh = models.BooleanField(db_column='MacDinh')  # Field name made lowercase. This field type is a guess.
     thanhphoid = models.ForeignKey(Thanhpho, models.DO_NOTHING, db_column='ThanhPhoID')  # Field name made lowercase.
     quanid = models.ForeignKey(Quan, models.DO_NOTHING, db_column='QuanID')  # Field name made lowercase.
     phuongid = models.ForeignKey(Phuong, models.DO_NOTHING, db_column='PhuongID')  # Field name made lowercase.
@@ -689,6 +707,30 @@ class Thongtingiaohang(models.Model):
     class Meta:
         managed = False
         db_table = 'thongtingiaohang'
+
+    def isDefault(self):
+        macDinh = self.macdinh
+        print(str(ord(macDinh)))
+        if str(ord(macDinh)) == '1':
+            return True
+        else:
+            return False
+
+    def thanhpho(self):
+        return self.thanhphoid.tenthanhpho
+    
+    def quan(self):
+        return self.quanid.tenquan
+
+    def phuong(self):
+        return self.phuongid.tenphuong
+
+    def loaidiachi(self):
+        return self.loaidiachiid.loai
+
+    def tenkhachhang(self):
+        user = self.khachhangid
+        return UserProfile.objects.get(user = user).hovaten
 
 
 class Thuonghieu(models.Model):
@@ -756,3 +798,21 @@ class OrderFormm(models.Model):
     phone = models.CharField(max_length = 255,blank=True, null=True)
     city = models.CharField(max_length = 255,blank=True, null=True)
     dvvc = models.IntegerField(blank=True, null=True)
+
+
+class BrowserOrderForm(models.Model):
+    maDonHang = models.CharField(max_length = 255,blank=True, null=True)
+    ngayDat = models.CharField(max_length = 255,blank=True, null=True)
+    khachHang = models.CharField(max_length = 255,blank=True, null=True)
+    thanhToan = models.CharField(max_length = 255,blank=True, null=True)
+    tinhTrang = models.CharField(max_length = 255,blank=True, null=True)
+    tongTien = models.CharField(max_length = 255,blank=True, null=True)
+
+class OrderDetailForm(models.Model):
+    stt = models.CharField(max_length = 255,blank=True, null=True)
+    maMatHang = models.CharField(max_length = 255,blank=True, null=True)
+    thongTinMatHang = models.CharField(max_length = 255,blank=True, null=True)
+    phanLoaiHang = models.CharField(max_length = 255,blank=True, null=True)
+    donGia = models.CharField(max_length = 255,blank=True, null=True)
+    soLuong = models.CharField(max_length = 255,blank=True, null=True)
+    thanhTien = models.CharField(max_length = 255,blank=True, null=True)

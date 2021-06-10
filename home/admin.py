@@ -3,8 +3,7 @@ from .models import *
 # Register your models here.
 
 class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ['hovaten', 'gioitinh', 'diachi', 'sodt', 'thethanhvien', 'role'
-    , 'image_tag']
+    list_display = ['hovaten', 'gioitinh', 'diachi', 'sodt', 'thethanhvien', 'role', 'image_tag']
 
 class DiscountAdmin(admin.ModelAdmin):
     list_display = ['value', 'hsd', 'requiree']
@@ -32,6 +31,32 @@ class ProductVariantAdmin(admin.ModelAdmin):
 class VariantValueAdmin(admin.ModelAdmin):
 	list_display = ['product_id','variant_id','attribute_id','value']
 
+class DonViVanChuyenAdmin(admin.ModelAdmin):
+    list_display = ['id','tendonvivanchuyen']
+
+class OrdernAdmin(admin.ModelAdmin):
+    list_display = ['id','taikhoanid','tongtien','status','createdat', 'updateat','phuongthucthanhtoan','phuongthucvanchuyen', 'nhanvienxuat']
+
+    
+class OrderDetailAdmin(admin.ModelAdmin):
+    list_display = ['id','orderid','productid','variantid','soluong','gia']
+
+
+class PaymentAdmin(admin.ModelAdmin):
+    list_display = ['id','sothe','tenchuthe','ngayphathanh','ngayhethan','phuongthucthanhtoan']
+
+
+class PaymentMethodAdmin(admin.ModelAdmin):
+    list_display = ['id','tenpthuc']
+
+
+class LoaiDiaChiAdmin(admin.ModelAdmin):
+    list_display = ['id','loai']
+
+
+class ThongtingiaohangAdmin(admin.ModelAdmin):
+    list_display = ['id','tenkhachhang', 'hoten','diachi','sodt','isDefault','thanhpho','quan','phuong','loaidiachi']
+
 admin.site.register(Product)
 admin.site.register(Tacgia)
 admin.site.register(Nhaxuatban)
@@ -46,12 +71,12 @@ admin.site.register(UserProfile, UserProfileAdmin)
 admin.site.register(Hinhanhsanpham)
 admin.site.register(Productcomment,ProductCommentAdmin)
 admin.site.register(Productcommentreply,ProductCommentReplyAdmin)
-admin.site.register(Order)
-admin.site.register(Orderdetail)
-admin.site.register(Payment)
+admin.site.register(Order,OrdernAdmin)
+admin.site.register(Orderdetail,OrderDetailAdmin)
+admin.site.register(Payment,PaymentAdmin)
 admin.site.register(Shipment)
-admin.site.register(Paymentmethod)
-admin.site.register(Donvivanchuyen)
+admin.site.register(Paymentmethod,PaymentMethodAdmin)
+admin.site.register(Donvivanchuyen, DonViVanChuyenAdmin)
 admin.site.register(Discount, DiscountAdmin)
 admin.site.register(ProductDiscount,ProductDiscountAdmin)
 admin.site.register(Attribute, AttributeAdmin)
@@ -65,3 +90,9 @@ admin.site.register(ProductAttribute, ProductAttributeAdmin)
 admin.site.register(ProductVariant,ProductVariantAdmin)
 admin.site.register(VariantValue,VariantValueAdmin)
 
+
+admin.site.register(Thongtingiaohang,ThongtingiaohangAdmin)
+admin.site.register(Loaidiachi,LoaiDiaChiAdmin)
+admin.site.register(Thanhpho)
+admin.site.register(Quan)
+admin.site.register(Phuong)

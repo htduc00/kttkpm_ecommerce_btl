@@ -39,7 +39,10 @@ urlpatterns = [
     path('addtoshopcart', views.addtoshopcart, name='addtoshopcart'),
     path('shopcart', views.shopcart, name='shopcart'),
     path('deletefromcart/<int:id>',views.deletefromcart,name='deletefromcart'),
-     path('orderproduct',views.orderproduct,name='orderproduct')
+    path('orderproduct',views.orderproduct,name='orderproduct'),
+    path('browserInvoice', views.browserInvoice, name="browserInvoice"),
+    path('waitingInvoiceDetail/<int:orderID>', views.waitingInvoiceDetail, name="waitingInvoiceDetail"),
+    path('exportInvoice', views.exportInvoice, name="exportInvoice")
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
