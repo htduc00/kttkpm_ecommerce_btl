@@ -42,7 +42,8 @@ urlpatterns = [
     path('orderproduct',views.orderproduct,name='orderproduct'),
     path('browserInvoice', views.browserInvoice, name="browserInvoice"),
     path('waitingInvoiceDetail/<int:orderID>', views.waitingInvoiceDetail, name="waitingInvoiceDetail"),
-    path('exportInvoice', views.exportInvoice, name="exportInvoice")
+    path('exportInvoice', views.exportInvoice, name="exportInvoice"),
+    path('addProduct', views.addProduct, name="addProduct")
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -37,3 +37,15 @@ class ExportInvoiceForm(forms.Form):
     orderId = forms.CharField(max_length=10)
     status = forms.ChoiceField(choices=STATUS)
 
+class AddProductForm(forms.Form):
+    typeChoices = [
+        ('Book', 'Book'),
+        ('Electro', 'Electro'),
+        ('Clothe', 'Clothe')
+    ]
+    ten = forms.CharField(label='Product Name', help_text='Insert product name')
+    mota = forms.CharField(label='Description', help_text='Insert description')
+    gia = forms.CharField(label='Price', help_text='Insert price')
+    chiTietSP = forms.CharField(label='Product Detail', help_text='Insert product detail')
+    type = forms.ChoiceField(label='Type', help_text='Select type', choices=typeChoices)
+

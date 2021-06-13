@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.core.validators import slug_re
 from django.db.models import Avg, Count, Q, F
 from django.db.models.functions import Concat
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, request
@@ -503,4 +504,28 @@ def exportInvoice(request):
             order.save()
         return HttpResponseRedirect('/browserInvoice')
 
+def addProduct(request):
+    if request.method == 'POST':
+        form = AddProductForm(request.POST)
+        if form.is_valid():
+            product = Product()
+            product.ten = form.cleaned_data['ten']
+            product.mota = form.cleaned_data['mota']
+            product.gia = form.cleaned_data['gia']
+            product.chitietsp = form.cleaned_data['chiTietSP']
+            product.type = form.cleaned_data['type']
+            product.danhgia = 0
+            product.slug = generateSlug(form.cleaned_data['ten'])
+            product.save()
+            messages.success(request, "Add product successfully")
+        return HttpResponseRedirect('/')
+
+    form = AddProductForm()
+    context = {
+        'title': 'Add Product',
+        'form': form
+    }
+    return render(request, 'addProduct.html', context)
     
+def generateSlug(name):
+    return '-'.join(str.split(name, ' '))
