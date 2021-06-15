@@ -8,6 +8,8 @@ from django.db.models.functions import Concat
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, request
 from django.shortcuts import render
 from datetime import date, datetime
+import json
+import uuid
 
 from .models import *
 from django import template
@@ -114,12 +116,12 @@ def product_detail(request,id,slug):
     
     variants = ProductVariant.objects.filter(product_id=id)
     productAttributes = ProductAttribute.objects.filter(product_id = id)
-    variantValues = VariantValue.objects.filter(product_id__product_id = id)
+    variantValues = VariantValue.objects.filter(product_id = id)
     colors = []
     sizes = []
     if productAttributes != None:
         for attribute in productAttributes:
-            attributeValues =  VariantValue.objects.filter(product_id__product_id = id, attribute_id = attribute)
+            attributeValues =  VariantValue.objects.filter(product_id = id, attribute_id = attribute)
             if attribute.attribute_id.tenthuoctinh == "color":
                 for itemvalue in attributeValues:
                     if itemvalue.value not in colors:
@@ -504,28 +506,126 @@ def exportInvoice(request):
             order.save()
         return HttpResponseRedirect('/browserInvoice')
 
-def addProduct(request):
-    if request.method == 'POST':
-        form = AddProductForm(request.POST)
-        if form.is_valid():
-            product = Product()
-            product.ten = form.cleaned_data['ten']
-            product.mota = form.cleaned_data['mota']
-            product.gia = form.cleaned_data['gia']
-            product.chitietsp = form.cleaned_data['chiTietSP']
-            product.type = form.cleaned_data['type']
-            product.danhgia = 0
-            product.slug = generateSlug(form.cleaned_data['ten'])
-            product.save()
-            messages.success(request, "Add product successfully")
-        return HttpResponseRedirect('/')
+def listProduct(request):
+    products = Product.objects.all()
+    context = {
+        'title': 'List products',
+        'products': products,
+    }
+    return render(request, 'adminListProduct.html', context)
 
+def addProduct(request):
     form = AddProductForm()
     context = {
         'title': 'Add Product',
         'form': form
     }
-    return render(request, 'addProduct.html', context)
+    return render(request, 'adminAddProduct.html', context)
+
+def submitProductOne(request):
+    if request.is_ajax():
+        product = Product()
+        product.ten = request.POST.get('ten', None)
+        product.mota = request.POST.get('mota', None)
+        product.gia = 0
+        product.chitietsp = request.POST.get('chiTietSP', None)
+        product.type = request.POST.get('type', None)
+        product.danhgia = 0
+        product.slug = generateSlug(request.POST.get('ten', None))
+        product.save()
+
+        attributes = request.POST.getlist('productOptionName', None)
+        attributeIds = []
+        for item in attributes:
+            attribute = Attribute()
+            attribute.tenthuoctinh = item
+            attribute.save()
+
+            productAttribute = ProductAttribute()
+            productAttribute.product_id = product
+            productAttribute.attribute_id = attribute
+            productAttribute.save()
+            attributeIds.append(productAttribute.id)
+
+        data = {
+            'success': True,
+            'productId': product.id,
+            'attributeIds': attributeIds
+        }  
+        response = json.dumps(data);
+        return HttpResponse(response, content_type='application/json')
+
+def submitProductTwo(request):
+    if request.is_ajax():
+        productId = request.POST.get('productId', None)
+        # attributeIds = request.POST.getList('attributeIds', None)
+        variantNames = request.POST.getlist('variantName', None)
+        prices = request.POST.getlist('price', None)
+        quantities = request.POST.getlist('quantity', None)
+
+        product = Product.objects.get(pk=productId)
+        productAttributes = ProductAttribute.objects.filter(product_id=productId)
+
+        for i in range(len(variantNames)):
+            productVariant = ProductVariant()
+            productVariant.variant_name = variantNames[i]
+            productVariant.price = prices[i]
+            productVariant.quantity = quantities[i]
+            productVariant.product_id = product
+            productVariant.variant_id = str(uuid.uuid4())
+            productVariant.save()
+
+            for productAttribute in productAttributes:
+                attribute = Attribute.objects.get(pk=productAttribute.id)
+
+                variantValue = VariantValue()
+                variantValue.product_id = product
+                variantValue.variant_id = productVariant
+                variantValue.attribute_id = productAttribute
+                variantValue.value = request.POST.getlist(attribute.tenthuoctinh, None)[i]
+                variantValue.save()
+
+        data = {
+            'success': True,
+        }
+        response = json.dumps(data);
+        return HttpResponse(response, content_type='application/json')
+
+def detailProduct(request, id):
+    product = Product.objects.get(pk=id)
+    if product == None:
+        return HttpResponseRedirect('/')
+
+    productVariants = ProductVariant.objects.filter(product_id=id)
+    productAttributes = ProductAttribute.objects.filter(product_id=id)
+    print(productAttributes)
+
+    productVariantList = []
+    productVariantKeys = []
+
+    for productVariant in productVariants:
+        temp = {
+            'Variant Name': productVariant.variant_name,
+            'Price': productVariant.price,
+            'Quantity': productVariant.quantity,
+        }
+
+        variantValues = VariantValue.objects.filter(variant_id=productVariant.variant_id)
+        for variantValue in variantValues:
+            attribute = Attribute.objects.get(pk=variantValue.attribute_id.id)
+            temp[attribute.tenthuoctinh] = variantValue.value
+
+        productVariantList.append(temp)
+
+    print(productVariantList)
+
+    context = {
+        'title': 'List products',
+        'product': product,
+        'productVariants': productVariantList,
+        'productVariantKeys': [] if len(productVariantList) == 0 else list(productVariantList[0].keys()),
+    }
+    return render(request, 'adminDetailProduct.html', context)
     
 def generateSlug(name):
     return '-'.join(str.split(name, ' '))

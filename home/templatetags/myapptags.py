@@ -44,3 +44,7 @@ def categoryTree():
     menu += '</ul>'
 
     return menu
+
+@register.simple_tag
+def get_item(dictionary, key):
+    return dictionary.get(key)

@@ -1,0 +1,71 @@
+{% extends 'homebase.html' %}
+
+{% block title %} {{ title }} {% endblock %}
+{% block sidebar %} {% include 'sidebar.html' %} {% endblock %}
+{% block slider %} {% include 'slider.html' %} {% endblock %}
+
+{% block body %}
+   <!-- BREADCRUMB -->
+   <div id="breadcrumb">
+        <div class="container">
+            <ul class="breadcrumb">
+                <li><a href="/">Home</a></li>
+                <li class="active"><a href="/adminListProduct">List Product</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- section -->
+	<div class="section">
+		<!-- container -->
+		<div class="container">
+			<!-- row -->
+			<div class="row">
+
+        <div class="col-md-12">
+            <div class="billing-details">
+                <div class="section-title">
+                    <h3 class="title">List Products</h3>
+                </div>
+                
+                <div style="margin-bottom: 20px">
+                  <a href="{% url 'adminAddProduct' %}"><button class="main-btn">Add Product</button></a>
+                </div>
+
+                <table class="table">
+                  <thead>
+                    <th style="width: 50px">No.</th>
+                    <th style="width: 100px">Product Name</th>
+                    <th>Product Description</th>
+                    <th width="10">Type</th>
+                    <th>Action</th>
+                  </thead>
+                  <tbody>
+                    {% for product in products %}
+                      <tr >
+                        <td>{{ product.id }}</td>
+                        <td>{{ product.ten }}</td>
+                        <td style="display: -webkit-box; text-overflow: ellipsis; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow-y: hidden;">{{ product.mota|safe }}</td>
+                        <td>{{ product.type }}</td>
+                        <td>
+                          <a href="{% url 'adminDetailProduct' id=product.id %}"><button class="main-btn">Detail</button></a>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+            </div>
+        </div>
+			</div>
+			<!-- /row -->
+		</div>
+		<!-- /container -->
+	</div>
+	<!-- /section -->
+    <script>
+      $(document).ready(function() {
+          
+      });
+    </script>
+
+{% endblock %}

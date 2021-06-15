@@ -1,0 +1,174 @@
+{% extends 'homebase.html' %}
+
+{% block title %} {{ title }} {% endblock %}
+{% block sidebar %} {% include 'sidebar.html' %} {% endblock %}
+{% block slider %} {% include 'slider.html' %} {% endblock %}
+
+{% block body %}
+   <!-- BREADCRUMB -->
+   <div id="breadcrumb">
+        <div class="container">
+            <ul class="breadcrumb">
+                <li><a href="/">Home</a></li>
+                <li class="active"><a href="/adminAddProduct">Add Product</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- section -->
+	<div class="section">
+		<!-- container -->
+		<div class="container">
+			<!-- row -->
+			<div class="row">
+
+                <div class="col-md-12">
+                    <div class="billing-details">
+                        <div class="section-title">
+                            <h3 class="title">Add Product</h3>
+                        </div>
+
+                        <div style="margin-bottom: 20px">
+                            <a href="{% url 'adminListProduct' %}"><button class="main-btn">Back to list</button></a>
+                        </div>
+
+                        <div id="formOneWrapper">
+                            <form method="post" action="{% url 'submitProductOne' %}" id="formOne">
+                                {% csrf_token %}
+                                <h2>Product Information</h2>
+                                {% for field in form %}
+                                    <p>
+                                        {{ field.label_tag }}<br>
+                                        {{ field }}
+                                        {% if field.help_text %}
+                                            <small style="color: grey">{{ field.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in field.errors %}
+                                            <p style="color: red">{{ error }}</p>
+                                        {% endfor %}
+                                    </p>
+                                    
+                                {% endfor %}
+    
+                                <h2>Product Option</h2>
+                                <div style="margin-bottom: 20px;">
+                                    <div id="optionWrapper">
+    
+                                    </div>
+                                    <button type="button" id="btnAddOption">Add Option</button>
+                                </div>
+                                <button type="submit">Add</button>
+                            </form>
+                        </div>
+
+                        <div id="formTwoWrapper" style="display: none;">
+                            <form method="post" action="{% url 'submitProductTwo' %}" id="formTwo">
+                                {% csrf_token %}
+                                <h2>Product Variant</h2>
+                                <div style="margin-bottom: 20px;">
+                                    <div id="variantWrapper">
+    
+                                    </div>
+                                    <button type="button" id="btnAddVariant">Add Variant</button>
+                                </div>
+    
+                                <button type="submit">Done</button>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+			</div>
+			<!-- /row -->
+		</div>
+		<!-- /container -->
+	</div>
+	<!-- /section -->
+    <script>
+        $(document).ready(function() {
+            let optionCount = 0, variantCount = 0;
+            let productId = null, attributeIds = null;
+            $(document).on('click', '#btnAddOption', function(e) {
+                const html = `
+                    <p data-option-id="${optionCount}" class="option-group-item">
+                        <label>Option ${optionCount + 1}</label>
+                        <input type="text" name="productOptionName" placeholder="Insert option name">
+                        <button type="button" class="btnRemoveOption" data-option-id=${optionCount}>Remove</button>
+                    </p>
+                `;
+                $('#optionWrapper').append(html);
+                optionCount += 1;
+            });
+
+            $(document).on('click', '.btnRemoveOption', function(e) {
+                optionCount -= 1;
+                $(this).parent().remove();
+                $('.option-group-item').each(function(index, elem){
+                    $(elem).attr('data-option-id', index);
+                    $(elem).find('label').text('Option ' + (index + 1));
+                    $(elem).find('.btnRemoveOption').attr('data-option-id', index);
+                });
+            });
+
+            $(document).on('click', '#btnAddVariant', function(e) {
+                let variantOptions = '';
+                for (let i = 0; i < optionCount; i++) {
+                    const optionElem = $(`[class=option-group-item][data-option-id=${i}]`).first();
+                    const optionName = optionElem.find('input').val();
+                    variantOptions += `<input name="${optionName}" type="text" placeholder="Insert ${optionName}"><br>`;
+                }
+                const html = `
+                    <p data-variant-id="${variantCount}" class="variant-group-item">
+                        <label>Variant ${variantCount + 1}</label><br>
+                        <input name="variantName" placeholder="Insert variant name"><br>
+                        <input name="price" placeholder="Insert variant price"><br>
+                        <input name="quantity" placeholder="Insert variant quantity"><br>
+                        ${variantOptions}
+                        <button type="button" class="btnRemoveVariant" data-variant-id=${variantCount}>Remove</button>
+                    </p>
+                `;
+                $('#variantWrapper').append(html);
+                variantCount += 1;
+            });
+
+
+            $(document).on('click', '.btnRemoveVariant', function(e) {
+                variantCount -= 1;
+                $(this).parent().remove();
+                $('.variant-group-item').each(function(index, elem){
+                    $(elem).attr('data-variant-id', index);
+                    $(elem).find('label').text('Variant ' + (index + 1));
+                    $(elem).find('.btnRemoveVariant').attr('data-variant-id', index);
+                });
+            });
+
+            $(document).on('submit', '#formOne', function(e) {
+                e.preventDefault();
+                $.ajax({
+                    method: 'POST',
+                    url: $(this).attr('action'),
+                    data: $(this).serialize(),
+                    success: function(res) {
+                        productId = res.productId;
+                        $('#formOneWrapper').hide();
+                        $('#formTwoWrapper').show();
+                    },
+                });
+            });
+
+            $(document).on('submit', '#formTwo', function(e) {
+                e.preventDefault();
+                $.ajax({
+                    method: 'POST',
+                    url: $(this).attr('action'),
+                    data:  $(this).serialize() + "&productId=" + productId,
+                    processData: false,
+                    success: function(res) {
+                        window.location.href = "{% url 'adminListProduct' %}";
+                    },
+                });
+            });
+        });
+    </script>
+
+{% endblock %}

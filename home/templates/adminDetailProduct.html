@@ -1,0 +1,99 @@
+{% extends 'homebase.html' %}
+
+{% block title %} {{ title }} {% endblock %}
+{% block sidebar %} {% include 'sidebar.html' %} {% endblock %}
+{% block slider %} {% include 'slider.html' %} {% endblock %}
+
+{% load myapptags %}
+
+{% block body %}
+   <!-- BREADCRUMB -->
+   <div id="breadcrumb">
+        <div class="container">
+            <ul class="breadcrumb">
+                <li><a href="/">Home</a></li>
+                <li class="active"><a href="/adminListProduct">List Product</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- section -->
+	<div class="section">
+		<!-- container -->
+		<div class="container">
+			<!-- row -->
+			<div class="row">
+
+        <div class="col-md-12">
+            <div class="billing-details">
+                <div class="section-title">
+                    <h3 class="title">List Products</h3>
+                </div>
+                
+                <div style="margin-bottom: 20px">
+                  <a href="{% url 'adminListProduct' %}"><button class="main-btn">Back to list</button></a>
+                </div>
+
+                <h1>Product Information</h1>
+
+                <table class="table">
+                  <tbody>
+                      <tr>
+                        <th>Id</th>
+                        <td>{{ product.id }}</td>
+                      </tr>
+                      <tr>
+                        <th>Name</th>
+                        <td>{{ product.ten }}</td>
+                      </tr>
+                      <tr>
+                        <th>Description</th>
+                        <td>{{ product.mota|safe }}</td>
+                      </tr>
+                      <tr>
+                        <th>Detail</th>
+                        <td>{{ product.chitietsp|safe }}</td>
+                      </tr>
+                      <tr>
+                        <th>Type</th>
+                        <td>{{ product.type }}</td>
+                      </tr>
+                      <tr>
+                        <th>Slug</th>
+                        <td>{{ product.slug }}</td>
+                      </tr>
+                  </tbody>
+                </table>
+
+                <h1>Product Variant</h1>
+                <table class="table">
+                  <thead>
+                    {% for key in productVariantKeys %}
+                      <th>{{key}}</th>
+                    {% endfor %}
+                  </thead>
+                  <tbody>
+                    {% for productVariant in productVariants %}
+                      <tr>
+                        {% for key in productVariantKeys %}
+                          <td>{% get_item productVariant key %}</td>
+                        {% endfor %}
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+            </div>
+        </div>
+			</div>
+			<!-- /row -->
+		</div>
+		<!-- /container -->
+	</div>
+	<!-- /section -->
+    <script>
+      $(document).ready(function() {
+          
+      });
+    </script>
+
+{% endblock %}

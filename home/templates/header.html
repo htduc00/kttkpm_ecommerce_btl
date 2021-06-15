@@ -84,6 +84,9 @@
                             {% if request.session.role == "Warehouse" %}
                                 <li><a href="/browserInvoice">Duyệt đơn</a></li>
                             {% endif %}
+                            {% if request.session.role == "Admin" %}
+                                <li><a href="{% url 'adminListProduct' %}">Product Management</a></li>
+                            {% endif %}
                             <li><a href="#"><i class="fa fa-heart-o"></i>My Favorits</a></li>
                             <li><a ><i class="fa fa-exchange"></i>My Orders</a></li>
                             <li><a ><i class="fa fa-check"></i>My Comments</a></li>
