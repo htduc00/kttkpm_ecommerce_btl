@@ -601,7 +601,6 @@ def detailProduct(request, id):
     print(productAttributes)
 
     productVariantList = []
-    productVariantKeys = []
 
     for productVariant in productVariants:
         temp = {
@@ -616,8 +615,6 @@ def detailProduct(request, id):
             temp[attribute.tenthuoctinh] = variantValue.value
 
         productVariantList.append(temp)
-
-    print(productVariantList)
 
     context = {
         'title': 'List products',
