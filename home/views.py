@@ -6,7 +6,7 @@ from django.db.models import Avg, Count, Q, F
 from django.db.models.functions import Concat
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, request
 from django.shortcuts import render
-from datetime import date
+from datetime import date, datetime
 
 from .models import *
 from django import template
@@ -356,7 +356,7 @@ def orderproduct(request):
             order = Order()
             order.taikhoanid = current_user
             order.tongtien = cartTotal
-            order.status = "new"
+            order.status = "WAITING"
             order.createat = date.today()
             order.shipmentid = shipment
             order.paymentid = payment
@@ -391,3 +391,116 @@ def orderproduct(request):
                'profile': profile,
                }
     return render(request, 'order_form.html', context)
+
+
+def browserInvoice(request):
+    status = request.GET.get('status','')
+    if status == 'WAITING':
+        allOrder = Order.objects.filter(status = 'WAITING'); # get All Order
+    else:
+        allOrder = Order.objects.all(); # get All Order
+    
+    list = []
+    for order in allOrder:
+        browserOrderForm = BrowserOrderForm()
+        browserOrderForm.maDonHang = str(order.id)
+        browserOrderForm.ngayDat = str(order.createdat)
+        browserOrderForm.khachHang = UserProfile.objects.get(user = order.taikhoanid).hovaten
+        payment = Payment.objects.get(id = order.id)
+        paymentMethod = Paymentmethod.objects.get(id = payment.paymentmethodid.id).tenpthuc
+        if paymentMethod == "cash":
+            thanhToan = "Thanh toán bằng tiền mặt"
+        elif paymentMethod == "AirPay":
+            thanhToan = "Thanh toán qua ví Airpay"
+        else:
+            thanhToan = "Thanh toán qua ví Momo"
+
+        if order.status == "WAITING":
+            tinhTrang = "Chưa xuất"
+        elif order.status == "DELIVERING":
+            tinhTrang = "Đang vận chuyển"
+        else:
+            tinhTrang = "NA"
+
+        tongTien = str(order.tongtien) + " VND"
+        browserOrderForm.thanhToan = thanhToan
+        browserOrderForm.tinhTrang = tinhTrang
+        browserOrderForm.tongTien = tongTien
+        list.append(browserOrderForm)
+        
+    title = "Duyệt đơn"
+    context = {'title':title, 'listOrder':list}
+    return render(request, 'browserInvoice.html', context)
+
+
+def waitingInvoiceDetail(request, orderID):
+    order = Order.objects.get(id = orderID) # get order by id
+    maDonHang = order.id # ma don hang
+    tongTien = order.tongtien # tong tien
+    nguoiDatHang = UserProfile.objects.get(user = order.taikhoanid).hovaten # Ho va ten nguoi dat hang
+    thoiGianDatHang = order.createdat # thoi gian dat hang
+
+    # lay toan bo thong tin giao hang cua user
+    user = UserProfile.objects.get(user = order.taikhoanid).user
+    thongTinGiaoHang = Thongtingiaohang.objects.filter(khachhangid = user)
+    # lay toan bo thong tin giao hang cua user
+
+    #dia chi nhan hang
+    diaChiNhanHang = ''
+    for item in thongTinGiaoHang:
+        if str(ord(item.macdinh)) == '1': # neu dia chi nhan hang la mac dinh (isDefault == True)
+            diaChiNhanHang = item.diachi
+    #end dia chi nhan hang        
+    
+    #phuong thuc thanh toan
+    payment = Payment.objects.get(id = order.id)
+    paymentMethod = Paymentmethod.objects.get(id = payment.paymentmethodid.id).tenpthuc
+    if paymentMethod == "cash":
+        phuongThucThanhToan = "Thanh toán bằng tiền mặt"
+    elif paymentMethod == "AirPay":
+        phuongThucThanhToan = "Thanh toán qua ví Airpay"
+    else:
+        phuongThucThanhToan = "Thanh toán qua ví Momo"
+    #end phuong thuc thanh toan
+
+    orderDetail = Orderdetail.objects.filter(orderid = order)
+    #STT	Mã mặt hàng	Thông tin mặt hàng	Phân loại hàng	Đơn giá	Số lượng	Thành tiền
+    listOrderDetail = []
+    stt = 1
+    for item in orderDetail:
+        orderDetailForm = OrderDetailForm()
+        orderDetailForm.stt = str(stt)
+        orderDetailForm.maMatHang = str(item.productid.id)
+        orderDetailForm.thongTinMatHang = item.productid.ten
+        orderDetailForm.phanLoaiHang = item.variantid.variant_name
+        orderDetailForm.donGia = str(item.gia) + ' VND'
+        orderDetailForm.soLuong = str(item.soluong)
+        orderDetailForm.thanhTien = str(item.gia*item.soluong) + ' VND'
+        listOrderDetail.append(orderDetailForm)
+        stt = stt+1
+    title = "Chi tiết đơn hàng chưa xuất"
+    context = {'title':title, 
+    'maDonHang':maDonHang, 'tongTien':tongTien, 
+    'nguoiDatHang':nguoiDatHang, 'thoiGianDatHang':thoiGianDatHang,
+    'diaChiNhanHang':diaChiNhanHang,'phuongThucThanhToan':phuongThucThanhToan, 'listOrderDetail':listOrderDetail}
+    return render(request, 'waitingInvoiceDetail.html', context)
+
+
+def exportInvoice(request):
+    if request.method == 'POST':
+        form = ExportInvoiceForm(request.POST)
+        if form.is_valid():
+            maDonHang = form.cleaned_data['orderId']
+            status = form.cleaned_data['status']
+            order = Order.objects.get(id = maDonHang)
+            if status == 'WAITING':
+                order.status = 'WAITING'
+            else:
+                order.status = 'DELIVERING'
+            current_user = request.user
+            order.nhanvienxuatid = current_user
+            order.updateat = datetime.now()
+            order.save()
+        return HttpResponseRedirect('/browserInvoice')
+
+    
