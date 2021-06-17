@@ -782,7 +782,7 @@ class ProductVariant(models.Model):
 
 class VariantValue(models.Model):
     id=models.AutoField(db_column='id',primary_key=True)
-    product_id = models.ForeignKey(ProductVariant, models.DO_NOTHING, db_column='product_id', related_name='products')
+    product_id = models.ForeignKey(Product, models.DO_NOTHING, db_column='product_id', related_name='products')
     variant_id = models.ForeignKey(ProductVariant, models.DO_NOTHING, db_column='variant_id',related_name='variants')
     attribute_id = models.ForeignKey(ProductAttribute, models.DO_NOTHING, db_column='attribute_id')
     value = models.CharField(db_column='value', max_length=255,blank=True,null=True)
