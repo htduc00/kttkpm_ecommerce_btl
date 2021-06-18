@@ -34,5 +34,7 @@ def predictComment(input):
         classifier = pickle.load(fin)
     
     custom_tokens = remove_noise(word_tokenize(input))
+    result = classifier.classify(dict([token, True] for token in custom_tokens))
+    print(input, result)
 
-    print(input, classifier.classify(dict([token, True] for token in custom_tokens)))
+    return result
