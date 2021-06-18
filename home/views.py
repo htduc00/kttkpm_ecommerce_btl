@@ -21,6 +21,7 @@ import json
 from json import JSONEncoder
 
 from django.urls import reverse
+from .dao import productDAO
 # Create your views here.
 
 def index(request):
@@ -592,7 +593,7 @@ def submitProductTwo(request):
         return HttpResponse(response, content_type='application/json')
 
 def detailProduct(request, id):
-    product = Product.objects.get(pk=id)
+    product = productDAO.findById(id)
     if product == None:
         return HttpResponseRedirect('/')
 
