@@ -1,0 +1,67 @@
+{% extends 'homebase.html' %}
+
+{% block title %} {{ title }} {% endblock %}
+{% block sidebar %} {% include 'sidebar.html' %} {% endblock %}
+{% block slider %} {% include 'slider.html' %} {% endblock %}
+
+{% block body %}
+   <!-- BREADCRUMB -->
+   <div id="breadcrumb">
+        <div class="container">
+            <ul class="breadcrumb">
+                <li><a href="/">Home</a></li>
+                <li class="active"><a href="/admin/ReviewReport">Review Report</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- section -->
+	<div class="section">
+		<!-- container -->
+		<div class="container">
+			<!-- row -->
+			<div class="row">
+
+        <div class="col-md-12">
+            <div class="billing-details">
+                <div class="section-title">
+                    <h3 class="title">List Products</h3>
+                </div>
+                
+                <div style="margin-bottom: 20px">
+                  <a href="{% url 'adminAddProduct' %}"><button class="main-btn">Add Product</button></a>
+                </div>
+
+                <table class="table">
+                  <thead>
+                    <th style="width: 50px">No.</th>
+                    <th style="width: 100px">Product Name</th>
+                    <th style="width: 200px">Review Content</th>
+                    <th>Sentiment</th>
+                  </thead>
+                  <tbody>
+                    {% for item in reportData %}
+                      <tr >
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ item.productName }}</td>
+                        <td style="display: -webkit-box; text-overflow: ellipsis; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow-y: hidden;">{{ item.content|safe }}</td>
+                        <td>{{ item.sentiment }}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+            </div>
+        </div>
+			</div>
+			<!-- /row -->
+		</div>
+		<!-- /container -->
+	</div>
+	<!-- /section -->
+    <script>
+      $(document).ready(function() {
+          
+      });
+    </script>
+
+{% endblock %}

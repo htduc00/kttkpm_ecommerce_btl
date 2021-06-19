@@ -3,38 +3,40 @@ from nltk.stem.wordnet import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 from nltk.tag import pos_tag
 
-import re, string
+import re, string, os
 
-def remove_noise(tweet_tokens, stop_words = ()):
+class PredictModel:
+    def __init__(_self):
+        with open(os.getcwd() + '/social/analysis.pk', 'rb') as fin:
+            _self.classifier = pickle.load(fin)
 
-    cleaned_tokens = []
+    def predict(_self, input): 
+        custom_tokens = _self._remove_noise(word_tokenize(input))
+        result = _self.classifier.classify(dict([token, True] for token in custom_tokens))
+        print(input, result)
 
-    for token, tag in pos_tag(tweet_tokens):
-        token = re.sub('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+#]|[!*\(\),]|'\
-                       '(?:%[0-9a-fA-F][0-9a-fA-F]))+','', token)
-        token = re.sub("(@[A-Za-z0-9_]+)","", token)
+        return result
 
-        if tag.startswith("NN"):
-            pos = 'n'
-        elif tag.startswith('VB'):
-            pos = 'v'
-        else:
-            pos = 'a'
+    def _remove_noise(_self, tweet_tokens, stop_words = ()):
+        cleaned_tokens = []
 
-        lemmatizer = WordNetLemmatizer()
-        token = lemmatizer.lemmatize(token, pos)
+        for token, tag in pos_tag(tweet_tokens):
+            token = re.sub('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+#]|[!*\(\),]|'\
+                        '(?:%[0-9a-fA-F][0-9a-fA-F]))+','', token)
+            token = re.sub("(@[A-Za-z0-9_]+)","", token)
 
-        if len(token) > 0 and token not in string.punctuation and token.lower() not in stop_words:
-            cleaned_tokens.append(token.lower())
-    return cleaned_tokens
+            if tag.startswith("NN"):
+                pos = 'n'
+            elif tag.startswith('VB'):
+                pos = 'v'
+            else:
+                pos = 'a'
 
+            lemmatizer = WordNetLemmatizer()
+            token = lemmatizer.lemmatize(token, pos)
 
-def predictComment(input):
-    with open('analysis.pk', 'rb') as fin:
-        classifier = pickle.load(fin)
-    
-    custom_tokens = remove_noise(word_tokenize(input))
-    result = classifier.classify(dict([token, True] for token in custom_tokens))
-    print(input, result)
+            if len(token) > 0 and token not in string.punctuation and token.lower() not in stop_words:
+                cleaned_tokens.append(token.lower())
+        return cleaned_tokens
 
-    return result
+# def remove_noise(tweet_tokens, stop_words = ()):

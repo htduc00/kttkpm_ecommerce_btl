@@ -22,6 +22,8 @@ from json import JSONEncoder
 
 from django.urls import reverse
 from .dao import productDAO
+from social.predict import PredictModel
+
 # Create your views here.
 
 def index(request):
@@ -624,6 +626,26 @@ def detailProduct(request, id):
         'productVariantKeys': [] if len(productVariantList) == 0 else list(productVariantList[0].keys()),
     }
     return render(request, 'adminDetailProduct.html', context)
-    
+
+def reviewReport(request):
+    reviews = Review.objects.all()
+    predictModel = PredictModel()
+    reportData = []
+
+    for review in reviews:
+        result = predictModel.predict(review.noidung)
+        reportData.append({
+            'reviewId': review.id,
+            'productId': review.productid.id,
+            'productName': review.productid.ten,
+            'content': review.noidung,
+            'sentiment': result,
+        })
+    context = {
+        'title': 'Review Report',
+        'reportData': reportData,
+    }
+    return render(request, 'adminReviewReport.html', context)
+
 def generateSlug(name):
     return '-'.join(str.split(name, ' '))

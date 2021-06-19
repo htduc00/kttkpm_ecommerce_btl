@@ -86,6 +86,7 @@
                             {% endif %}
                             {% if request.session.role == "Admin" %}
                                 <li><a href="{% url 'adminListProduct' %}">Product Management</a></li>
+                                <li><a href="{% url 'adminReviewReport' %}">Review Report</a></li>
                             {% endif %}
                             <li><a href="#"><i class="fa fa-heart-o"></i>My Favorits</a></li>
                             <li><a ><i class="fa fa-exchange"></i>My Orders</a></li>
