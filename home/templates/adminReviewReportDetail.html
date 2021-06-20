@@ -10,7 +10,7 @@
         <div class="container">
             <ul class="breadcrumb">
                 <li><a href="/">Home</a></li>
-                <li class="active"><a href="/admin/ReviewReport">Review Report</a></li>
+                <li class="active"><a href="/admin/ReviewReport">Review Report Detail</a></li>
             </ul>
         </div>
     </div>
@@ -25,27 +25,27 @@
         <div class="col-md-12">
             <div class="billing-details">
                 <div class="section-title">
-                    <h3 class="title">Review Report</h3>
+                    <h3 class="title">Review Report Detail</h3>
+                </div>
+                
+                <div style="margin-bottom: 20px">
+                  <a href="{% url 'adminReviewReport' %}"><button class="main-btn">Back to list</button></a>
                 </div>
 
                 <table class="table">
                   <thead>
                     <th style="width: 50px">No.</th>
-                    <th style="width: 200px">Product Name</th>
-                    <th>Positive</th>
-                    <th>Negative</th>
-                    <th>Action</th>
+                    <th style="width: 200px">Customer Email</th>
+                    <th style="width: 400px">Review Content</th>
+                    <th>Sentiment</th>
                   </thead>
                   <tbody>
                     {% for item in reportData %}
                       <tr >
                         <td>{{ forloop.counter }}</td>
-                        <td>{{ item.productName }}</td>
-                        <td>{{ item.positive }}</td>
-                        <td>{{ item.negative }}</td>
-                        <td>
-                          <a href="{% url 'adminReviewReportDetail' id=item.productId %}"><button class="main-btn">View Details</button></a>
-                        </td>
+                        <td>{{ item.email }}</td>
+                        <td style="display: -webkit-box; text-overflow: ellipsis; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow-y: hidden;">{{ item.content|safe }}</td>
+                        <td>{{ item.sentiment }}</td>
                       </tr>
                     {% endfor %}
                   </tbody>

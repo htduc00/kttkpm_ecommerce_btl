@@ -49,6 +49,7 @@ urlpatterns = [
     path('admin/listProduct/', views.listProduct, name="adminListProduct"),
     path('admin/detailProduct/<int:id>',views.detailProduct, name='adminDetailProduct'),
     path('admin/reviewReport', views.reviewReport, name='adminReviewReport'),
+    path('admin/reviewReport/detail/<int:id>', views.reviewReportDetail, name='adminReviewReportDetail'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

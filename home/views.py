@@ -588,9 +588,7 @@ def submitProductTwo(request):
                 variantValue.value = request.POST.getlist(attribute.tenthuoctinh, None)[i]
                 variantValue.save()
 
-        data = {
-            'success': True,
-        }
+        data = { 'success': True }
         response = json.dumps(data);
         return HttpResponse(response, content_type='application/json')
 
@@ -634,18 +632,48 @@ def reviewReport(request):
 
     for review in reviews:
         result = predictModel.predict(review.noidung)
-        reportData.append({
-            'reviewId': review.id,
-            'productId': review.productid.id,
-            'productName': review.productid.ten,
-            'content': review.noidung,
-            'sentiment': result,
-        })
+        foundIndex = next((index for (index, d) in enumerate(reportData) if d["productId"] == review.productid.id), None)
+        if foundIndex == None:
+            reportData.append({
+                'reviewId': review.id,
+                'productId': review.productid.id,
+                'productName': review.productid.ten,
+                'positive': 1 if result == 'Positive' else 0,
+                'negative': 1 if result == 'Negative' else 0,
+            })
+        else:
+            temp = reportData[foundIndex]
+            temp['positive'] = temp['positive'] + 1 if result == 'Positive' else temp['positive']
+            temp['negative'] = temp['negative'] + 1 if result == 'Negative' else temp['negative']
+            reportData[foundIndex] = temp
+    
     context = {
         'title': 'Review Report',
         'reportData': reportData,
     }
     return render(request, 'adminReviewReport.html', context)
+
+def reviewReportDetail(request, id):
+    reviews = Review.objects.filter(productid=id)
+    predictModel = PredictModel()
+    reportData = []
+
+    for review in reviews:
+        result = predictModel.predict(review.noidung)
+        print(review.taikhoanid)
+        reportData.append({
+            'reviewId': review.id,
+            'customerId': review.taikhoanid.id,
+            'email': review.taikhoanid.email,
+            'content': review.noidung,
+            'sentiment': result,
+        })
+    
+    context = {
+        'title': 'Review Report Detail',
+        'reportData': reportData,
+    }
+    return render(request, 'adminReviewReportDetail.html', context)
 
 def generateSlug(name):
     return '-'.join(str.split(name, ' '))
